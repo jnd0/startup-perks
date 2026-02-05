@@ -1,0 +1,557 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PerkCard from "../components/PerkCard.astro";
+import SubmitPerkModal from "../components/SubmitPerkModal.astro";
+
+const perks = ((await getCollection("perks")) as CollectionEntry<"perks">[])
+  .filter((entry: CollectionEntry<"perks">) => entry.data.isActive)
+  .sort((a: CollectionEntry<"perks">, b: CollectionEntry<"perks">) =>
+    (b.data.creditValueUsd ?? 0) - (a.data.creditValueUsd ?? 0)
+  );
+
+const categories = [...new Set(perks.flatMap((perk: CollectionEntry<"perks">) => perk.data.categories))].sort();
+const fundingStages = [...new Set(perks.flatMap((perk: CollectionEntry<"perks">) => perk.data.fundingStages))].sort();
+
+const totalCreditValue = perks.reduce(
+  (total: number, perk: CollectionEntry<"perks">) => total + (perk.data.creditValueUsd ?? 0),
+  0
+);
+const verifiedCount = perks.filter((perk: CollectionEntry<"perks">) => perk.data.verified).length;
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "";
+const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
+---
+
+<BaseLayout
+  title="StartupPerks — The Premium Directory"
+  description="Verified startup credits, discounts, and eligibility requirements in one professional registry."
+>
+  <main class="page-shell">
+    <header class="site-header">
+      <div class="brand-meta">
+        <div class="version-badge">REGISTRY V1.0</div>
+        <h1 class="site-title">Startup<span>Perks</span></h1>
+        <p class="site-tagline">High-fidelity directory of infrastructure grants and software perks for modern founders.</p>
+      </div>
+      
+      <div class="header-actions">
+        <button id="openSubmitModalBtn" class="button button-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Submit Perk
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-overview">
+      <div class="stat-card">
+        <span class="stat-label">Verified Market Value</span>
+        <span class="stat-value highlight">{currencyFormatter.format(totalCreditValue)}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active Registry Entries</span>
+        <span class="stat-value">{perks.length}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Trust Score (Verified)</span>
+        <span class="stat-value">{verifiedCount}</span>
+      </div>
+    </section>
+
+    <section class="controls-card card">
+      <div class="controls-top">
+        <div class="search-field">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="search" placeholder="Search by provider, stage, or category..." autocomplete="off" />
+        </div>
+        
+        <div class="sort-field">
+          <span class="field-label">Sort by</span>
+          <select id="sortSelect">
+            <option value="credit-desc">Highest Value</option>
+            <option value="credit-asc">Lowest Value</option>
+            <option value="recently-verified">Latest Verified</option>
+            <option value="company-asc">Provider A-Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-sections">
+        <div class="filter-row">
+          <span class="row-label">Categories</span>
+          <div class="chip-group">
+            {categories.map((cat: string) => (
+              <label class="filter-pill">
+                <input type="checkbox" name="category" value={cat.toLowerCase()} />
+                <span>{cat}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        
+        <div class="filter-row">
+          <span class="row-label">Startup Stage</span>
+          <div class="chip-group">
+            {fundingStages.map((stage: string) => (
+              <label class="filter-pill">
+                <input type="checkbox" name="stage" value={stage.toLowerCase()} />
+                <span>{stage}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div class="filter-bar-footer">
+          <label class="verified-switch">
+            <input id="verifiedOnly" type="checkbox" />
+            <span class="switch-text">Show Verified Only</span>
+          </label>
+          <button id="clearFilters" class="reset-button">Reset View</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="ledger-container">
+      <div class="ledger-head">
+        <span class="head-col provider">Provider</span>
+        <span class="head-col entry">Offer</span>
+        <span class="head-col tags">Attributes</span>
+        <span class="head-col action">Action</span>
+      </div>
+      <div id="resultsGrid" class="ledger-list">
+        {perks.map((perk: CollectionEntry<"perks">) => <PerkCard perk={perk} />)}
+      </div>
+    </div>
+
+    <div id="emptyState" class="empty-state" hidden>
+      <div class="empty-content">
+        <h3>No Registry Matches</h3>
+        <p>Try broadening your query or clearing filters.</p>
+        <button class="button" onclick="document.getElementById('clearFilters').click()">Reset System</button>
+      </div>
+    </div>
+
+    <SubmitPerkModal repositoryUrl={repositoryUrl} baseBranch={repositoryBranch} />
+  </main>
+
+  <script is:inline>
+    function init() {
+      const cards = Array.from(document.querySelectorAll(".perk-row"));
+      const resultsGrid = document.getElementById("resultsGrid");
+      const emptyState = document.getElementById("emptyState");
+      const searchInput = document.getElementById("searchInput");
+      const sortSelect = document.getElementById("sortSelect");
+      const verifiedOnly = document.getElementById("verifiedOnly");
+      const clearFiltersButton = document.getElementById("clearFilters");
+      const openSubmitModalBtn = document.getElementById("openSubmitModalBtn");
+
+      if (!resultsGrid) return;
+
+      if(openSubmitModalBtn) {
+          openSubmitModalBtn.onclick = () => {
+              const modal = document.getElementById('submitModal');
+              if(modal) {
+                  modal.hidden = false;
+                  document.body.style.overflow = "hidden";
+              }
+          };
+      }
+
+      const checkboxInputs = Array.from(document.querySelectorAll('input[type="checkbox"][name]'));
+      const parseDataSet = (raw) => new Set((raw || "").split("|").filter(Boolean));
+      const selectedValues = (name) =>
+        Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map((input) => input.value.toLowerCase());
+
+      const cardMatches = (card) => {
+        const searchQuery = searchInput.value.trim().toLowerCase();
+        const selectedCategories = selectedValues("category");
+        const selectedStages = selectedValues("stage");
+        const hasVerifiedOnly = verifiedOnly.checked;
+
+        const cardSearch = card.dataset.search || "";
+        const cardCategories = parseDataSet(card.dataset.categories);
+        const cardStages = parseDataSet(card.dataset.stages);
+        const isVerified = card.dataset.verified === "true";
+
+        if (searchQuery && !cardSearch.includes(searchQuery)) return false;
+        if (selectedCategories.length && !selectedCategories.some((value) => cardCategories.has(value))) return false;
+        if (selectedStages.length && !selectedStages.some((value) => cardStages.has(value))) return false;
+        if (hasVerifiedOnly && !isVerified) return false;
+
+        return true;
+      };
+
+      const sortCards = (activeCards) => {
+        const mode = sortSelect.value;
+        return activeCards.sort((a, b) => {
+          const creditA = Number(a.dataset.credit || "0");
+          const creditB = Number(b.dataset.credit || "0");
+          const verifiedAtA = Number(a.dataset.lastVerified || "0");
+          const verifiedAtB = Number(b.dataset.lastVerified || "0");
+          const companyA = a.dataset.company || "";
+          const companyB = b.dataset.company || "";
+
+          if (mode === "credit-asc") return creditA - creditB;
+          if (mode === "recently-verified") return verifiedAtB - verifiedAtA;
+          if (mode === "company-asc") return companyA.localeCompare(companyB);
+          return creditB - creditA;
+        });
+      };
+
+      const runFilters = () => {
+        const visibleCards = cards.filter((card) => cardMatches(card));
+        cards.forEach((card) => {
+          card.style.display = visibleCards.includes(card) ? "grid" : "none";
+        });
+        const sortedVisibleCards = sortCards([...visibleCards]);
+        sortedVisibleCards.forEach((card) => resultsGrid.append(card));
+        emptyState.hidden = visibleCards.length > 0;
+      };
+
+      searchInput.addEventListener("input", runFilters);
+      sortSelect.addEventListener("change", runFilters);
+      verifiedOnly.addEventListener("change", runFilters);
+      checkboxInputs.forEach((checkbox) => checkbox.addEventListener("change", runFilters));
+
+      clearFiltersButton.addEventListener("click", () => {
+        searchInput.value = "";
+        sortSelect.value = "credit-desc";
+        checkboxInputs.forEach((checkbox) => checkbox.checked = false);
+        verifiedOnly.checked = false;
+        runFilters();
+      });
+
+      runFilters();
+    }
+
+    document.addEventListener('astro:page-load', init);
+  </script>
+</BaseLayout>
+
+<style>
+  .site-header {
+    padding: 4rem 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3rem;
+  }
+
+  .version-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  .site-title {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 800;
+    margin: 0;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+  }
+
+  .site-title span {
+    color: #cbd5e1;
+    font-weight: 400;
+  }
+
+  .site-tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 0.75rem 0 0;
+    max-width: 42ch;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.25rem;
+  }
+
+  /* Stats Overview */
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stat-card:hover {
+    border-color: var(--fg);
+    box-shadow: 0 8px 20px -10px rgba(0,0,0,0.08);
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .stat-value.highlight {
+    color: var(--accent);
+  }
+
+  /* Controls Card */
+  .controls-card {
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+    display: grid;
+    gap: 1.25rem;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .controls-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .search-field svg {
+    position: absolute;
+    left: 0;
+    color: #94a3b8;
+    pointer-events: none;
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-field input {
+    height: 2.5rem;
+    padding-left: 2rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid #f1f5f9;
+    border-radius: 0;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-shadow: none;
+  }
+
+  .search-field input:focus {
+    background: transparent;
+    border-color: #000;
+    box-shadow: none;
+  }
+
+  .sort-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .sort-field select {
+    appearance: none;
+    background: none;
+    border: none;
+    font-weight: 800;
+    color: #000;
+    cursor: pointer;
+    padding: 0.25rem 1.25rem 0.25rem 0.25rem;
+    font-size: 0.8rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  .filter-sections {
+    display: grid;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .row-label {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+  }
+
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .filter-pill {
+    cursor: pointer;
+  }
+
+  .filter-pill input {
+    display: none;
+  }
+
+  .filter-pill span {
+    display: inline-block;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #f8fafc;
+    color: #475569;
+    border-radius: 6px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.1s;
+  }
+
+  .filter-pill:hover span {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+  }
+
+  .filter-pill input:checked + span {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+  }
+
+  .filter-bar-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f8fafc;
+  }
+
+  .verified-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .reset-button {
+    background: none;
+    border: none;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .reset-button:hover {
+    color: #000;
+  }
+
+  /* Registry Table */
+  .ledger-container {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ledger-head {
+    display: grid;
+    grid-template-columns: 180px 1fr 220px 100px;
+    padding: 0.75rem 2rem;
+    background: #fcfcfc;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.1em;
+  }
+
+  .empty-state {
+    padding: 10rem 0;
+    text-align: center;
+  }
+
+  .empty-content h3 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .empty-content p {
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 1100px) {
+    .site-header {
+      flex-direction: column;
+      padding: 4rem 0 2rem;
+    }
+    .stats-overview {
+      grid-template-columns: 1fr;
+    }
+    .controls-top {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .filter-row {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .ledger-head {
+      display: none;
+    }
+  }
+</style>

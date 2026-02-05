@@ -1,0 +1,75 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const repositoryUrl = import.meta.env.PUBLIC_REPO_URL;
+---
+
+<BaseLayout title="Contributing - StartupPerks" description="How to contribute startup perks to the open-source StartupPerks directory.">
+  <main class="page-shell">
+    <section class="card contribute">
+      <p class="contribute__eyebrow">Contribute in minutes</p>
+      <h1>How to add a startup perk</h1>
+      <ol>
+        <li>Fork the repository.</li>
+        <li>Add one Markdown file in <code>src/content/perks</code>.</li>
+        <li>Fill all required frontmatter fields.</li>
+        <li>Run <code>bun run check</code>.</li>
+        <li>Open a pull request with source links.</li>
+      </ol>
+
+      <p>Full guidance and the copy/paste template are in <code>CONTRIBUTING.md</code> at the repository root.</p>
+      <p>You can also use the homepage <code>Submit perk</code> form to open a prefilled GitHub PR flow.</p>
+
+      {
+        repositoryUrl && (
+          <p>
+            Repo URL configured: <a href={repositoryUrl}>{repositoryUrl}</a>
+          </p>
+        )
+      }
+
+      <a class="button button-primary" href="/">Back to perks</a>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .contribute {
+    padding: clamp(1.1rem, 2vw + 0.9rem, 2rem);
+  }
+
+  .contribute__eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0.3rem 0 0;
+    font-family: "Newsreader", Georgia, serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+  }
+
+  ol {
+    margin: 1rem 0;
+    padding-left: 1.2rem;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  p {
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .button {
+    margin-top: 1rem;
+  }
+</style>

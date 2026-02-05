@@ -1,0 +1,230 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  perk: CollectionEntry<"perks">;
+}
+
+const { perk } = Astro.props;
+const { data } = perk;
+
+const searchable = [
+  data.company,
+  data.title,
+  data.summary,
+  data.eligibility,
+  ...data.categories,
+  ...data.fundingStages,
+]
+  .join(" ")
+  .toLowerCase();
+---
+
+<article
+  class="perk-row"
+  data-search={searchable}
+  data-categories={data.categories.join("|").toLowerCase()}
+  data-stages={data.fundingStages.join("|").toLowerCase()}
+  data-verified={String(data.verified)}
+  data-credit={String(data.creditValueUsd ?? 0)}
+  data-company={data.company.toLowerCase()}
+  data-last-verified={String(data.lastVerified.getTime())}
+>
+  <div class="perk-cell provider">
+    <div class="provider-content">
+      <span class="co-name">{data.company}</span>
+      {data.verified && (
+        <span class="verified-badge" title="Verified Registry Entry">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      )}
+    </div>
+  </div>
+
+  <div class="perk-cell entry">
+    <h3 transition:name={`perk-title-${perk.id}`}>{data.title}</h3>
+    <p class="summary">{data.summary}</p>
+  </div>
+
+  <div class="perk-cell tags">
+    <div class="tag-stack">
+      <div class="tags-row">
+        {data.categories.slice(0, 2).map((cat: string) => <span class="tag-pill">{cat}</span>)}
+      </div>
+      <div class="tags-row secondary">
+        {data.fundingStages.slice(0, 1).map((stage: string) => <span class="tag-pill stage">{stage}</span>)}
+      </div>
+    </div>
+  </div>
+
+  <div class="perk-cell status">
+    <a href={`/perks/${perk.id}`} class="examine-link">
+      <span>Details</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+    </a>
+  </div>
+</article>
+
+<style>
+  .perk-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 220px 100px;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .perk-row:last-child {
+    border-bottom: none;
+  }
+
+  .perk-row:hover {
+    background-color: #fcfcfc;
+    transform: scale(1.001);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+    z-index: 1;
+  }
+
+  .perk-cell {
+    padding: 1.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .provider {
+    border-right: 1px solid #f1f5f9;
+  }
+
+  .provider-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .co-name {
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+  }
+
+  .verified-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    background: var(--highlight);
+    color: #000;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .entry {
+    border-right: 1px solid #f1f5f9;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+  }
+
+  .summary {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tags {
+    border-right: 1px solid #f1f5f9;
+  }
+
+  .tag-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .tag-pill {
+    font-family: var(--font-ui);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .tag-pill.stage {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+  }
+
+  .examine-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #94a3b8;
+    transition: all 0.2s;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .perk-row:hover .examine-link {
+    color: #000;
+  }
+
+  .examine-link svg {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 12px;
+    height: 12px;
+  }
+
+  .perk-row:hover .examine-link svg {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 1100px) {
+    .perk-row {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+    .perk-cell {
+      padding: 0.5rem 0;
+      border: none;
+    }
+    .status {
+      border-top: 1px solid #f1f5f9;
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+    }
+    .examine-link {
+      justify-content: space-between;
+    }
+    .summary {
+      -webkit-line-clamp: 2;
+    }
+  }
+</style>

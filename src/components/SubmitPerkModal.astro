@@ -1,0 +1,336 @@
+---
+interface Props {
+  repositoryUrl?: string;
+  baseBranch?: string;
+}
+
+const { repositoryUrl = "", baseBranch = "main" } = Astro.props;
+
+const categories = ["AI", "Cloud", "Developer Tools", "Payments", "Fintech", "Security", "Marketing", "Sales", "Productivity"];
+const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
+---
+
+<div id="submitModal" class="modal-root" hidden>
+  <div class="modal-overlay" data-close-modal></div>
+  
+  <div class="modal-container" role="dialog" aria-modal="true">
+    <header class="modal-header">
+      <h2 class="modal-title">Submit Perk</h2>
+      <button id="closeSubmitModal" class="close-button" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <form id="submitPerkForm" class="submit-form">
+        <div class="form-section">
+          <label class="field">
+            <span class="label">Company Name</span>
+            <input class="input" name="company" required placeholder="e.g. Stripe" />
+          </label>
+
+          <div class="field">
+            <span class="label">Perk Type</span>
+            <div class="segmented-control">
+              <label><input type="radio" name="perkType" value="credit" checked /> <span>Credit</span></label>
+              <label><input type="radio" name="perkType" value="discount" /> <span>Discount</span></label>
+              <label><input type="radio" name="perkType" value="mixed" /> <span>Mixed</span></label>
+            </div>
+          </div>
+
+          <label class="field">
+            <span class="label">Value (Display)</span>
+            <input class="input" name="amountDisplay" required placeholder="e.g. $50,000" />
+          </label>
+
+          <label class="field">
+            <span class="label">Eligibility Wording</span>
+            <textarea class="textarea" name="eligibility" rows="2" required placeholder="e.g. For Seed stage startups..."></textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="label">Primary Category</span>
+              <select class="select" name="categories" required>
+                {categories.map(c => <option value={c}>{c}</option>)}
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="label">Minimum Stage</span>
+              <select class="select" name="fundingStages" required>
+                {stages.map(s => <option value={s}>{s}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="label">Official Program URL</span>
+            <input class="input" name="url" type="url" required placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="form-footer">
+          <p class="disclaimer">This will open a pre-filled Pull Request on GitHub.</p>
+          <button class="button button-primary full-width" type="submit">Submit to GitHub</button>
+          <p id="submitPerkFeedback" class="feedback"></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ repositoryUrl, baseBranch }}>
+  function setupModal() {
+    const modal = document.getElementById("submitModal");
+    const closeBtn = document.getElementById("closeSubmitModal");
+    const overlay = document.querySelector("[data-close-modal]");
+    const form = document.getElementById("submitPerkForm");
+    const feedback = document.getElementById("submitPerkFeedback");
+
+    if (!modal) return;
+
+    const hide = () => {
+      modal.hidden = true;
+      document.body.style.overflow = "";
+    };
+
+    const show = () => {
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+
+    // Attach to triggers
+    const trigger = document.getElementById("openSubmitModalBtn");
+    if (trigger) trigger.onclick = show;
+
+    if (closeBtn) closeBtn.onclick = hide;
+    if (overlay) overlay.onclick = hide;
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hidden) hide();
+    });
+
+    if (form) {
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        
+        const match = repositoryUrl.match(/github\.com\/([^/]+\/[^/]+?)(?:\.git|\/)?$/i);
+        const repoSlug = match ? match[1] : "";
+
+        if (!repoSlug) {
+          if (feedback) feedback.textContent = "Error: GitHub Repository not configured.";
+          return;
+        }
+
+        const formData = new FormData(form);
+        const company = (formData.get("company") || "").toString().trim();
+        const type = (formData.get("perkType") || "credit").toString();
+        const amount = (formData.get("amountDisplay") || "").toString().trim();
+        const eligibility = (formData.get("eligibility") || "").toString().trim();
+        const category = (formData.get("categories") || "").toString();
+        const stage = (formData.get("fundingStages") || "").toString();
+        const urlField = (formData.get("url") || "").toString().trim();
+
+        const today = new Date().toISOString().slice(0, 10);
+        const slug = company.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + type;
+        const filename = `${slug}.md`;
+
+        const yamlString = (val) => `"${val.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+
+        const markdown = `---
+company: ${yamlString(company)}
+title: ${yamlString(`${amount} in ${company} Credits`)}
+summary: ${yamlString(`Official startup program for ${company}.`)}
+perkType: ${yamlString(type)}
+amountDisplay: ${yamlString(amount)}
+currency: "USD"
+eligibility: ${yamlString(eligibility)}
+fundingStages:
+  - ${yamlString(stage)}
+regions:
+  - "Global"
+categories:
+  - ${yamlString(category)}
+applyUrl: ${yamlString(urlField)}
+sourceUrl: ${yamlString(urlField)}
+lastVerified: ${today}
+verified: false
+isActive: true
+---
+
+Added via ledger submit form.
+`;
+
+        const githubUrl = `https://github.com/${repoSlug}/new/${baseBranch}/src/content/perks?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(markdown)}&message=${encodeURIComponent(`feat: add ${company} perk`)}`;
+        
+        window.open(githubUrl, "_blank");
+        if (feedback) feedback.textContent = "Redirecting to GitHub...";
+        setTimeout(hide, 1500);
+      };
+    }
+  }
+
+  document.addEventListener('astro:page-load', setupModal);
+</script>
+
+<style>
+  .modal-root {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .modal-root[hidden] {
+    display: none !important;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .modal-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    display: flex;
+    transition: color 0.2s;
+  }
+
+  .close-button:hover {
+    color: var(--fg);
+  }
+
+  .modal-body {
+    padding: 2rem;
+  }
+
+  .submit-form {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .form-section {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .segmented-control {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: #f5f5f5;
+    padding: 3px;
+    border-radius: 8px;
+  }
+
+  .segmented-control label {
+    cursor: pointer;
+  }
+
+  .segmented-control input {
+    display: none;
+  }
+
+  .segmented-control span {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .segmented-control input:checked + span {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .form-footer {
+    padding-top: 1rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .disclaimer {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+    margin: 0;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .feedback {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0d7a64;
+    text-align: center;
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .modal-body { padding: 1.5rem; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
