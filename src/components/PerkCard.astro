@@ -42,7 +42,7 @@ const searchable = [
   </div>
 
   <div class="perk-cell entry">
-    <h3 transition:name={`perk-title-${perk.id}`}>{data.title}</h3>
+    <h3>{data.title}</h3>
     <p class="summary">{data.summary}</p>
   </div>
 
@@ -58,8 +58,9 @@ const searchable = [
   </div>
 
   <div class="perk-cell status">
-    <a href={`/perks/${perk.id}`} class="examine-link">
+    <a href={`/perks/${perk.id}/`} class="examine-link">
       <span>Details</span>
+      <span class="sr-only"> for {data.company} startup perk</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
     </a>
   </div>

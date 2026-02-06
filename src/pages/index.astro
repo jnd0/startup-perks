@@ -30,26 +30,52 @@ const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
 const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
 const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
 const canonicalUrl = new URL("/", siteUrl).toString();
+const organizationId = `${canonicalUrl}#organization`;
+const websiteId = `${canonicalUrl}#website`;
+const collectionId = `${canonicalUrl}#collection`;
+
+const itemListElements = perks.map((perk: CollectionEntry<"perks">, index: number) => ({
+  "@type": "ListItem",
+  position: index + 1,
+  url: new URL(`/perks/${perk.id}/`, siteUrl).toString(),
+  name: `${perk.data.company}: ${perk.data.amountDisplay}`,
+}));
 
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: "StartupPerks",
+      url: canonicalUrl,
+      logo: new URL("/favicon.svg", siteUrl).toString(),
+      sameAs: [repositoryUrl],
+    },
+    {
       "@type": "WebSite",
-      "@id": `${canonicalUrl}#website`,
+      "@id": websiteId,
       name: "StartupPerks",
       url: canonicalUrl,
       description: "Open-source directory of startup credits, discounts, and trial programs.",
       inLanguage: "en",
+      publisher: {
+        "@id": organizationId,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${canonicalUrl}?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
     },
     {
       "@type": "CollectionPage",
-      "@id": `${canonicalUrl}#collection`,
+      "@id": collectionId,
       url: canonicalUrl,
       name: "Startup credits and perks directory",
       description: "Search startup cloud credits, software discounts, and eligibility details.",
       isPartOf: {
-        "@id": `${canonicalUrl}#website`,
+        "@id": websiteId,
       },
       about: {
         "@type": "Thing",
@@ -58,6 +84,7 @@ const structuredData = {
       mainEntity: {
         "@type": "ItemList",
         numberOfItems: perks.length,
+        itemListElement: itemListElements,
       },
     },
   ],
@@ -106,7 +133,7 @@ const structuredData = {
       <div class="controls-top">
         <div class="search-field">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input id="searchInput" type="search" placeholder="Search by provider, stage, or category..." autocomplete="off" />
+          <input id="searchInput" name="q" type="search" placeholder="Search by provider, stage, or category…" autocomplete="off" />
         </div>
         
         <div class="sort-field">
@@ -175,6 +202,19 @@ const structuredData = {
       </div>
     </div>
 
+    <footer class="site-footer" aria-label="Site footer">
+      <a href="/contributing/" class="footer-link">Contribute a perk</a>
+      <p class="footer-note">
+        Created with <span class="footer-heart" aria-hidden="true">&#10084;</span> for founders.
+      </p>
+      <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" class="footer-source">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+          <path d="M12 .5C5.65.5.5 5.66.5 12.03c0 5.1 3.3 9.42 7.88 10.95.58.1.8-.25.8-.56v-2.17c-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.35.96.1-.75.4-1.26.72-1.55-2.56-.3-5.25-1.29-5.25-5.74 0-1.27.45-2.31 1.2-3.13-.12-.3-.52-1.53.12-3.2 0 0 .98-.31 3.2 1.2a11.06 11.06 0 0 1 5.82 0c2.22-1.52 3.2-1.2 3.2-1.2.64 1.67.24 2.9.12 3.2.75.82 1.2 1.86 1.2 3.13 0 4.46-2.7 5.44-5.27 5.74.41.36.78 1.06.78 2.14v3.18c0 .31.21.67.8.56A11.54 11.54 0 0 0 23.5 12.03C23.5 5.66 18.35.5 12 .5Z"/>
+        </svg>
+        <span>Source on GitHub</span>
+      </a>
+    </footer>
+
     <SubmitPerkModal repositoryUrl={repositoryUrl} baseBranch={repositoryBranch} submissionApiUrl={submissionApiUrl} />
   </main>
 
@@ -202,6 +242,12 @@ const structuredData = {
       }
 
       const checkboxInputs = Array.from(document.querySelectorAll('input[type="checkbox"][name]'));
+      const initialParams = new URLSearchParams(window.location.search);
+      const initialSearch = initialParams.get("q");
+      if (initialSearch) {
+        searchInput.value = initialSearch;
+      }
+
       const parseDataSet = (raw) => new Set((raw || "").split("|").filter(Boolean));
       const selectedValues = (name) =>
         Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map((input) => input.value.toLowerCase());
@@ -244,6 +290,13 @@ const structuredData = {
 
       const runFilters = () => {
         const visibleCards = cards.filter((card) => cardMatches(card));
+        const query = searchInput.value.trim();
+        const params = new URLSearchParams(window.location.search);
+        if (query) params.set("q", query);
+        else params.delete("q");
+        const next = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+        window.history.replaceState({}, "", next);
+
         cards.forEach((card) => {
           card.style.display = visibleCards.includes(card) ? "grid" : "none";
         });
@@ -549,7 +602,7 @@ const structuredData = {
   .ledger-head {
     display: grid;
     grid-template-columns: 180px 1fr 220px 100px;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 0;
     background: #fcfcfc;
     border-bottom: 1px solid var(--line);
     font-size: 0.6rem;
@@ -557,6 +610,22 @@ const structuredData = {
     text-transform: uppercase;
     color: #94a3b8;
     letter-spacing: 0.1em;
+  }
+
+  .head-col {
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+  }
+
+  .head-col.provider,
+  .head-col.entry,
+  .head-col.tags {
+    border-right: 1px solid #f1f5f9;
+  }
+
+  .head-col.action {
+    justify-content: flex-end;
   }
 
   .empty-state {
@@ -574,6 +643,121 @@ const structuredData = {
   .empty-content p {
     color: var(--muted);
     margin-bottom: 2.5rem;
+  }
+
+  .site-footer {
+    position: relative;
+    margin: 0 0 3rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff 0%, #fcfcfc 100%);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .site-footer::after {
+    content: "";
+    position: absolute;
+    inset: auto -25% -56% -25%;
+    height: 75%;
+    background: radial-gradient(circle at 50% 0%, rgba(190, 242, 100, 0.18), transparent 70%);
+    pointer-events: none;
+  }
+
+  .footer-link {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #475569;
+    transition: all 0.2s ease;
+    justify-self: start;
+  }
+
+  .footer-link::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--highlight);
+    box-shadow: 0 0 0 3px rgba(190, 242, 100, 0.2);
+  }
+
+  .footer-link:hover {
+    border-color: #cbd5e1;
+    color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -12px rgba(15, 23, 42, 0.45);
+  }
+
+  .footer-link:focus-visible {
+    outline: 2px solid #0f172a;
+    outline-offset: 2px;
+  }
+
+  .footer-note {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    letter-spacing: -0.01em;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .footer-heart {
+    display: inline-block;
+    margin: 0 0.2rem;
+    color: #e11d48;
+    font-size: 1.12em;
+    line-height: 1;
+    transform: translateY(1px);
+  }
+
+  .footer-source {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-self: end;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+  }
+
+  .footer-source:hover {
+    color: var(--fg);
+  }
+
+  .footer-source svg {
+    width: 0.86rem;
+    height: 0.86rem;
+  }
+
+  .footer-source:focus-visible {
+    outline: 2px solid #0f172a;
+    outline-offset: 2px;
   }
 
   @media (max-width: 1100px) {
@@ -594,6 +778,17 @@ const structuredData = {
     }
     .ledger-head {
       display: none;
+    }
+    .site-footer {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+    }
+    .footer-link,
+    .footer-note,
+    .footer-source {
+      justify-self: center;
     }
   }
 </style>
