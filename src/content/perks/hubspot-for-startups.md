@@ -1,9 +1,9 @@
 ---
 company: HubSpot
 title: HubSpot for Startups CRM and marketing discounts
-summary: HubSpot for Startups offers significant discounts on CRM and marketing tooling for early-stage teams.
+summary: HubSpot for Startups offers tiered discounts on CRM and growth tooling for early-stage teams through approved partners.
 perkType: discount
-amountDisplay: Up to 75% discount on eligible plans
+amountDisplay: Up to 90% off in year one on eligible plans
 eligibility: Startups typically need to be associated with approved VC, accelerator, or startup program partners.
 fundingStages:
   - Pre-seed
@@ -22,4 +22,4 @@ verified: true
 isActive: true
 ---
 
-Discount percentage depends on partner and startup stage. Always confirm the current pricing terms on the official page.
+Discount percentage depends on stage and partner track. Confirm current terms and renewal discounts on the official page.
