@@ -25,10 +25,12 @@ Optional environment variables:
 PUBLIC_REPO_URL=https://github.com/your-org/startupperks
 PUBLIC_REPO_BRANCH=main
 PUBLIC_SUBMISSION_API_URL=https://startup-perks-submit-api.<your-subdomain>.workers.dev/api/submit-perk
+PUBLIC_SITE_URL=https://startup-perks.com
 ```
 
 The repo currently defaults to `https://github.com/jnd0/startup-perks` and `main` if these are not set. Set these vars only if you want to override those defaults.
 If `PUBLIC_SUBMISSION_API_URL` is set, the submit form creates a PR automatically via the Worker API, so contributors do not need GitHub accounts.
+`PUBLIC_SITE_URL` controls canonical URLs and sitemap domain during build.
 
 ## Deploy to Cloudflare Pages
 
@@ -41,8 +43,9 @@ If `PUBLIC_SUBMISSION_API_URL` is set, the submit form creates a PR automaticall
    - Build output directory: `dist`
    - Root directory: repository root
 4. Set environment variables for Preview and Production:
-   - `PUBLIC_REPO_URL=https://github.com/your-org/startupperks`
-   - `PUBLIC_REPO_BRANCH=main`
+    - `PUBLIC_REPO_URL=https://github.com/your-org/startupperks`
+    - `PUBLIC_REPO_BRANCH=main`
+    - `PUBLIC_SITE_URL=https://startup-perks.com`
 5. Save and deploy.
 
 ### Wrangler CLI (optional)
@@ -66,6 +69,7 @@ Notes:
 - This project is static Astro output (`dist/`), so no Cloudflare adapter is required.
 - Bun is only needed at build time. If your Pages image does not support Bun, use `npm run build` as fallback.
 - Cloudflare Workers with static assets do not support runtime Worker variables; use build-time envs or rely on the repository defaults in this codebase.
+- SEO assets are generated at build time: `dist/sitemap-index.xml` and `public/robots.txt`.
 
 ## Automated submissions API
 

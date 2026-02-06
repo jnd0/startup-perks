@@ -28,11 +28,48 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
 const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
 const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
+const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
+const canonicalUrl = new URL("/", siteUrl).toString();
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${canonicalUrl}#website`,
+      name: "StartupPerks",
+      url: canonicalUrl,
+      description: "Open-source directory of startup credits, discounts, and trial programs.",
+      inLanguage: "en",
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": `${canonicalUrl}#collection`,
+      url: canonicalUrl,
+      name: "Startup credits and perks directory",
+      description: "Search startup cloud credits, software discounts, and eligibility details.",
+      isPartOf: {
+        "@id": `${canonicalUrl}#website`,
+      },
+      about: {
+        "@type": "Thing",
+        name: "Startup perks and credits",
+      },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: perks.length,
+      },
+    },
+  ],
+};
 ---
 
 <BaseLayout
-  title="StartupPerks — The Premium Directory"
-  description="Verified startup credits, discounts, and eligibility requirements in one professional registry."
+  title="StartupPerks | Startup Credits, Free Trials, and SaaS Discounts"
+  description="Explore 50+ startup credits and software perks with eligibility details, source links, and contribution-ready updates."
+  canonicalUrl={canonicalUrl}
+  ogType="website"
+  structuredData={structuredData}
 >
   <main class="page-shell">
     <header class="site-header">

@@ -12,6 +12,7 @@
     "deploy:submit-api": "bunx wrangler deploy --config workers/submit-api/wrangler.toml"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
     "astro": "^5.17.1"
   }
 }

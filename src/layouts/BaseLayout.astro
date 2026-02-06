@@ -5,12 +5,30 @@ import { ClientRouter } from "astro:transitions";
 interface Props {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  ogType?: "website" | "article";
+  noindex?: boolean;
+  ogImage?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 const {
   title = "Startup Perks",
   description = "A curated, open-source ledger of startup credits, discounts, and eligibility requirements.",
+  canonicalUrl,
+  ogType = "website",
+  noindex = false,
+  ogImage = "/og-default.svg",
+  structuredData,
 } = Astro.props;
+
+const pageUrl = canonicalUrl ?? Astro.url.toString();
+const normalizedUrl = pageUrl.endsWith("index.html") ? pageUrl.replace(/index\.html$/, "") : pageUrl;
+const ogImageUrl = ogImage.startsWith("http") ? ogImage : new URL(ogImage, normalizedUrl).toString();
+const robotsContent = noindex
+  ? "noindex, nofollow"
+  : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+const jsonLd = structuredData ? JSON.stringify(structuredData) : "";
 ---
 
 <!doctype html>
@@ -20,7 +38,24 @@ const {
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="robots" content={robotsContent} />
     <meta name="theme-color" content="#ffffff" />
+    <link rel="canonical" href={normalizedUrl} />
+
+    <meta property="og:site_name" content="StartupPerks" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={normalizedUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content="StartupPerks" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:url" content={normalizedUrl} />
+
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
 
@@ -30,6 +65,7 @@ const {
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <ClientRouter />
   </head>
   <body>

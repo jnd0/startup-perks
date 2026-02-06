@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SubmitPerkModal from "../../components/SubmitPerkModal.astro";
@@ -18,6 +18,7 @@ interface Props {
 
 const { perk } = Astro.props;
 const { data } = perk;
+const { Content } = await render(perk);
 
 // Get related perks
 const allPerks = await getCollection("perks");
@@ -28,9 +29,66 @@ const relatedPerks = allPerks
 const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
 const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
 const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
+const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
+const canonicalUrl = new URL(`/perks/${perk.id}/`, siteUrl).toString();
+const pageTitle = `${data.company} for Startups: ${data.amountDisplay} | StartupPerks`;
+const pageDescription = data.summary;
+const noindex = !data.isActive;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "StartupPerks",
+          item: new URL("/", siteUrl).toString(),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: data.company,
+          item: canonicalUrl,
+        },
+      ],
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: pageTitle,
+      description: pageDescription,
+      inLanguage: "en",
+      about: {
+        "@type": "Thing",
+        name: data.company,
+      },
+      mainEntity: {
+        "@type": "Offer",
+        name: data.title,
+        description: data.summary,
+        url: data.applyUrl,
+        category: data.perkType,
+        availability: data.isActive
+          ? "https://schema.org/InStock"
+          : "https://schema.org/Discontinued",
+      },
+    },
+  ],
+};
 ---
 
-<BaseLayout title={`${data.company} - Perk Detail`} description={data.summary}>
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl={canonicalUrl}
+  ogType="article"
+  noindex={noindex}
+  structuredData={structuredData}
+>
   <main class="page-shell">
     <nav class="back-nav">
       <a href="/" class="back-link">
@@ -66,12 +124,9 @@ const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
           <section class="info-section">
             <h2>The Perk</h2>
             <div class="prose">
-              <p>{data.amountDisplay} in credits provided directly by {data.company}. This program is designed to help early-stage teams scale their infrastructure with enterprise-grade tools.</p>
-              <ul>
-                <li>Integrated product credits</li>
-                <li>Direct technical support access</li>
-                <li>Founder community resources</li>
-              </ul>
+              <p>{data.title}</p>
+              <p>{data.summary}</p>
+              <Content />
             </div>
           </section>
 
@@ -107,7 +162,15 @@ const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
               </div>
               <div class="meta-item">
                 <dt>Status</dt>
-                <dd class="active-status">Active</dd>
+                <dd class={data.isActive ? "active-status" : "inactive-status"}>
+                  {data.isActive ? "Active" : "Inactive"}
+                </dd>
+              </div>
+              <div class="meta-item">
+                <dt>Source</dt>
+                <dd>
+                  <a href={data.sourceUrl} target="_blank" rel="noopener noreferrer">Official source</a>
+                </dd>
               </div>
             </dl>
           </section>
@@ -239,6 +302,10 @@ const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
     line-height: 1.6;
   }
 
+  .prose p + p {
+    margin-top: 1rem;
+  }
+
   .prose ul {
     padding-left: 1.5rem;
     margin-top: 2rem;
@@ -306,6 +373,15 @@ const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
 
   .active-status {
     color: #0d7a64;
+  }
+
+  .inactive-status {
+    color: #b42318;
+  }
+
+  .meta-item dd a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .related-stack {
