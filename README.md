@@ -26,7 +26,7 @@ PUBLIC_REPO_URL=https://github.com/your-org/startupperks
 PUBLIC_REPO_BRANCH=main
 ```
 
-If `PUBLIC_REPO_URL` is set, the homepage submit form opens a prefilled GitHub create-file flow that starts the PR process.
+The repo currently defaults to `https://github.com/jnd0/startup-perks` and `main` if these are not set. Set these vars only if you want to override those defaults.
 
 ## Deploy to Cloudflare Pages
 
@@ -63,6 +63,7 @@ Notes:
 
 - This project is static Astro output (`dist/`), so no Cloudflare adapter is required.
 - Bun is only needed at build time. If your Pages image does not support Bun, use `npm run build` as fallback.
+- Cloudflare Workers with static assets do not support runtime Worker variables; use build-time envs or rely on the repository defaults in this codebase.
 
 ## Project structure
 

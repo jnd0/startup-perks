@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const repositoryUrl = import.meta.env.PUBLIC_REPO_URL;
+const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
 ---
 
 <BaseLayout title="Contributing - StartupPerks" description="How to contribute startup perks to the open-source StartupPerks directory.">

@@ -25,7 +25,7 @@ const relatedPerks = allPerks
   .filter((p: CollectionEntry<"perks">) => p.id !== perk.id && p.data.categories.some((c: string) => data.categories.includes(c)))
   .slice(0, 3);
 
-const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "";
+const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
 const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
 ---
 
