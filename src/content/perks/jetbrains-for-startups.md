@@ -14,8 +14,8 @@ regions:
 categories:
   - Developer Tools
   - Productivity
-applyUrl: https://www.jetbrains.com/community/startups/
-sourceUrl: https://www.jetbrains.com/community/startups/
+applyUrl: https://www.jetbrains.com/startups/
+sourceUrl: https://www.jetbrains.com/startups/
 lastVerified: 2026-02-06
 verified: false
 isActive: true

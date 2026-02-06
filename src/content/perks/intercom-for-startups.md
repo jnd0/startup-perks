@@ -14,8 +14,8 @@ regions:
 categories:
   - Support
   - Marketing
-applyUrl: https://www.intercom.com/startups
-sourceUrl: https://www.intercom.com/startups
+applyUrl: https://www.intercom.com/early-stage
+sourceUrl: https://www.intercom.com/early-stage
 lastVerified: 2026-02-06
 verified: false
 isActive: true

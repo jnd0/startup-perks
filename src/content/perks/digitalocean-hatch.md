@@ -16,8 +16,8 @@ regions:
 categories:
   - Cloud
   - Infrastructure
-applyUrl: https://www.digitalocean.com/hatch
-sourceUrl: https://www.digitalocean.com/hatch
+applyUrl: https://www.digitalocean.com/startups
+sourceUrl: https://www.digitalocean.com/startups
 lastVerified: 2026-02-06
 verified: false
 isActive: true

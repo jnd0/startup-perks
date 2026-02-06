@@ -17,8 +17,8 @@ categories:
   - Cloud
   - Security
   - Performance
-applyUrl: https://www.cloudflare.com/startups/
-sourceUrl: https://www.cloudflare.com/startups/
+applyUrl: https://www.cloudflare.com/forstartups/
+sourceUrl: https://www.cloudflare.com/forstartups/
 lastVerified: 2026-02-05
 verified: true
 isActive: true

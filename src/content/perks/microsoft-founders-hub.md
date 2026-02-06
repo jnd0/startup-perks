@@ -18,8 +18,8 @@ categories:
   - Cloud
   - AI
   - Developer Tools
-applyUrl: https://foundershub.startups.microsoft.com/
-sourceUrl: https://foundershub.startups.microsoft.com/
+applyUrl: https://portal.startups.microsoft.com/
+sourceUrl: https://portal.startups.microsoft.com/
 lastVerified: 2026-02-05
 verified: true
 isActive: true

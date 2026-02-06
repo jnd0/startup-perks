@@ -14,8 +14,8 @@ regions:
 categories:
   - Analytics
   - Product
-applyUrl: https://mixpanel.com/
-sourceUrl: https://mixpanel.com/
+applyUrl: https://mixpanel.com/home/
+sourceUrl: https://mixpanel.com/home/
 lastVerified: 2026-02-06
 verified: false
 isActive: true

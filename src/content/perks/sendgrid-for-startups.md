@@ -14,8 +14,8 @@ regions:
 categories:
   - Marketing
   - Developer Tools
-applyUrl: https://sendgrid.com/
-sourceUrl: https://sendgrid.com/
+applyUrl: https://sendgrid.com/en-us
+sourceUrl: https://sendgrid.com/en-us
 lastVerified: 2026-02-06
 verified: false
 isActive: true

@@ -18,8 +18,8 @@ categories:
   - Cloud
   - DevOps
   - Infrastructure
-applyUrl: https://aws.amazon.com/activate/
-sourceUrl: https://aws.amazon.com/activate/
+applyUrl: https://aws.amazon.com/startups
+sourceUrl: https://aws.amazon.com/startups
 lastVerified: 2026-02-05
 verified: true
 isActive: true

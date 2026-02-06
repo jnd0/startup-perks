@@ -15,8 +15,8 @@ regions:
 categories:
   - Fintech
   - Payments
-applyUrl: https://www.brex.com/startups
-sourceUrl: https://www.brex.com/startups
+applyUrl: https://www.brex.com/solutions/startups
+sourceUrl: https://www.brex.com/solutions/startups
 lastVerified: 2026-02-06
 verified: false
 isActive: true

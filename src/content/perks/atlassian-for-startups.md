@@ -16,8 +16,8 @@ regions:
 categories:
   - Productivity
   - Collaboration
-applyUrl: https://www.atlassian.com/startups
-sourceUrl: https://www.atlassian.com/startups
+applyUrl: https://www.atlassian.com/software/startups
+sourceUrl: https://www.atlassian.com/software/startups
 lastVerified: 2026-02-06
 verified: false
 isActive: true

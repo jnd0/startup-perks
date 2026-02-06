@@ -14,8 +14,8 @@ regions:
 categories:
   - Collaboration
   - Support
-applyUrl: https://zoom.us/
-sourceUrl: https://zoom.us/
+applyUrl: https://www.zoom.com/
+sourceUrl: https://www.zoom.com/
 lastVerified: 2026-02-06
 verified: false
 isActive: true
