@@ -379,7 +379,7 @@ const structuredData = {
 
   .controls-top {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 2rem;
     align-items: center;
   }
@@ -389,6 +389,8 @@ const structuredData = {
     display: flex;
     align-items: center;
     flex: 1;
+    width: 100%;
+    min-width: 0;
   }
 
   .search-field svg {
@@ -401,6 +403,8 @@ const structuredData = {
   }
 
   .search-field input {
+    width: 100%;
+    min-width: 0;
     height: 2.5rem;
     padding-left: 2rem;
     background: transparent;
