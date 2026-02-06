@@ -24,9 +24,11 @@ Optional environment variables:
 ```bash
 PUBLIC_REPO_URL=https://github.com/your-org/startupperks
 PUBLIC_REPO_BRANCH=main
+PUBLIC_SUBMISSION_API_URL=https://startup-perks-submit-api.<your-subdomain>.workers.dev/api/submit-perk
 ```
 
 The repo currently defaults to `https://github.com/jnd0/startup-perks` and `main` if these are not set. Set these vars only if you want to override those defaults.
+If `PUBLIC_SUBMISSION_API_URL` is set, the submit form creates a PR automatically via the Worker API, so contributors do not need GitHub accounts.
 
 ## Deploy to Cloudflare Pages
 
@@ -64,6 +66,23 @@ Notes:
 - This project is static Astro output (`dist/`), so no Cloudflare adapter is required.
 - Bun is only needed at build time. If your Pages image does not support Bun, use `npm run build` as fallback.
 - Cloudflare Workers with static assets do not support runtime Worker variables; use build-time envs or rely on the repository defaults in this codebase.
+
+## Automated submissions API
+
+The repository includes a separate Worker API at `workers/submit-api/` for automatic PR creation.
+
+Deploy it with:
+
+```bash
+bunx wrangler secret put GITHUB_TOKEN --config workers/submit-api/wrangler.toml
+bunx wrangler deploy --config workers/submit-api/wrangler.toml
+```
+
+Then set `PUBLIC_SUBMISSION_API_URL` in your frontend deployment to:
+
+```text
+https://startup-perks-submit-api.<your-subdomain>.workers.dev/api/submit-perk
+```
 
 ## Project structure
 

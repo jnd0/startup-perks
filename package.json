@@ -7,7 +7,9 @@
     "build": "astro build",
     "check": "astro sync && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "dev:submit-api": "bunx wrangler dev --config workers/submit-api/wrangler.toml",
+    "deploy:submit-api": "bunx wrangler deploy --config workers/submit-api/wrangler.toml"
   },
   "dependencies": {
     "astro": "^5.17.1"

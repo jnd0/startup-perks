@@ -27,6 +27,7 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 
 const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
 const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
+const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
 ---
 
 <BaseLayout
@@ -137,7 +138,7 @@ const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
       </div>
     </div>
 
-    <SubmitPerkModal repositoryUrl={repositoryUrl} baseBranch={repositoryBranch} />
+    <SubmitPerkModal repositoryUrl={repositoryUrl} baseBranch={repositoryBranch} submissionApiUrl={submissionApiUrl} />
   </main>
 
   <script is:inline>

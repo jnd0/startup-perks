@@ -2,9 +2,10 @@
 interface Props {
   repositoryUrl?: string;
   baseBranch?: string;
+  submissionApiUrl?: string;
 }
 
-const { repositoryUrl = "", baseBranch = "main" } = Astro.props;
+const { repositoryUrl = "", baseBranch = "main", submissionApiUrl = "" } = Astro.props;
 
 const categories = ["AI", "Cloud", "Developer Tools", "Payments", "Fintech", "Security", "Marketing", "Sales", "Productivity"];
 const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
@@ -68,11 +69,16 @@ const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
             <span class="label">Official Program URL</span>
             <input class="input" name="url" type="url" required placeholder="https://..." />
           </label>
+
+          <label class="field field-hp" aria-hidden="true">
+            <span class="label">Website</span>
+            <input class="input" name="website" tabindex="-1" autocomplete="off" />
+          </label>
         </div>
 
         <div class="form-footer">
-          <p class="disclaimer">This will open a pre-filled Pull Request on GitHub.</p>
-          <button class="button button-primary full-width" type="submit">Submit to GitHub</button>
+          <p id="submitPerkDisclaimer" class="disclaimer">This will open a pre-filled Pull Request on GitHub.</p>
+          <button id="submitPerkButton" class="button button-primary full-width" type="submit">Submit Perk</button>
           <p id="submitPerkFeedback" class="feedback"></p>
         </div>
       </form>
@@ -80,15 +86,24 @@ const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
   </div>
 </div>
 
-<script is:inline define:vars={{ repositoryUrl, baseBranch }}>
+<script is:inline define:vars={{ repositoryUrl, baseBranch, submissionApiUrl }}>
   function setupModal() {
     const modal = document.getElementById("submitModal");
     const closeBtn = document.getElementById("closeSubmitModal");
     const overlay = document.querySelector("[data-close-modal]");
     const form = document.getElementById("submitPerkForm");
     const feedback = document.getElementById("submitPerkFeedback");
+    const submitButton = document.getElementById("submitPerkButton");
+    const disclaimer = document.getElementById("submitPerkDisclaimer");
 
     if (!modal) return;
+
+    const hasSubmissionApi = typeof submissionApiUrl === "string" && submissionApiUrl.trim().length > 0;
+    if (disclaimer) {
+      disclaimer.textContent = hasSubmissionApi
+        ? "This creates a pull request automatically. GitHub account optional."
+        : "This will open a pre-filled Pull Request on GitHub.";
+    }
 
     const hide = () => {
       modal.hidden = true;
@@ -112,34 +127,22 @@ const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
       if (e.key === 'Escape' && !modal.hidden) hide();
     });
 
-    if (form) {
-      form.onsubmit = (e) => {
-        e.preventDefault();
-        
-        const match = repositoryUrl.match(/github\.com\/([^/]+\/[^/]+?)(?:\.git|\/)?$/i);
-        const repoSlug = match ? match[1] : "";
+    const toSlug = (value) =>
+      value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") || "new-perk";
 
-        if (!repoSlug) {
-          if (feedback) feedback.textContent = "Error: GitHub Repository not configured.";
-          return;
-        }
+    const yamlString = (val) =>
+      `"${val
+        .replaceAll("\\", "\\\\")
+        .replaceAll('"', '\\"')
+        .replaceAll("\n", " ")}"`;
 
-        const formData = new FormData(form);
-        const company = (formData.get("company") || "").toString().trim();
-        const type = (formData.get("perkType") || "credit").toString();
-        const amount = (formData.get("amountDisplay") || "").toString().trim();
-        const eligibility = (formData.get("eligibility") || "").toString().trim();
-        const category = (formData.get("categories") || "").toString();
-        const stage = (formData.get("fundingStages") || "").toString();
-        const urlField = (formData.get("url") || "").toString().trim();
-
-        const today = new Date().toISOString().slice(0, 10);
-        const slug = company.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + type;
-        const filename = `${slug}.md`;
-
-        const yamlString = (val) => `"${val.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
-
-        const markdown = `---
+    const createMarkdown = ({ company, type, amount, eligibility, category, stage, urlField }) => {
+      const today = new Date().toISOString().slice(0, 10);
+      return `---
 company: ${yamlString(company)}
 title: ${yamlString(`${amount} in ${company} Credits`)}
 summary: ${yamlString(`Official startup program for ${company}.`)}
@@ -162,11 +165,95 @@ isActive: true
 
 Added via ledger submit form.
 `;
+    };
 
-        const githubUrl = `https://github.com/${repoSlug}/new/${baseBranch}/src/content/perks?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(markdown)}&message=${encodeURIComponent(`feat: add ${company} perk`)}`;
-        
+    const buildGithubCreateUrl = ({ company, type, amount, eligibility, category, stage, urlField }) => {
+      const match = repositoryUrl.match(/github\.com\/([^/]+\/[^/]+?)(?:\.git|\/)?$/i);
+      const repoSlug = match ? match[1] : "";
+      if (!repoSlug) return "";
+
+      const filename = `${toSlug(company)}-${type}.md`;
+      const markdown = createMarkdown({ company, type, amount, eligibility, category, stage, urlField });
+
+      return `https://github.com/${repoSlug}/new/${baseBranch}/src/content/perks?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(markdown)}&message=${encodeURIComponent(`feat: add ${company} perk`)}`;
+    };
+
+    const setFeedback = (message, isError = false) => {
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.classList.toggle("is-error", isError);
+    };
+
+    const setSubmitting = (isSubmitting, label = "Submit Perk") => {
+      if (!submitButton) return;
+      submitButton.textContent = label;
+      submitButton.disabled = isSubmitting;
+    };
+
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const company = (formData.get("company") || "").toString().trim();
+        const type = (formData.get("perkType") || "credit").toString();
+        const amount = (formData.get("amountDisplay") || "").toString().trim();
+        const eligibility = (formData.get("eligibility") || "").toString().trim();
+        const category = (formData.get("categories") || "").toString();
+        const stage = (formData.get("fundingStages") || "").toString();
+        const urlField = (formData.get("url") || "").toString().trim();
+
+        const payload = {
+          company,
+          perkType: type,
+          amountDisplay: amount,
+          eligibility,
+          categories: [category],
+          fundingStages: [stage],
+          url: urlField,
+          website: (formData.get("website") || "").toString(),
+        };
+
+        if (hasSubmissionApi) {
+          setSubmitting(true, "Creating PR...");
+          try {
+            const response = await fetch(submissionApiUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(result.error || "Could not create PR automatically.");
+            }
+
+            if (result.prUrl) {
+              window.open(result.prUrl, "_blank");
+            }
+
+            setFeedback("PR created successfully. Opening now...");
+            form.reset();
+            setTimeout(hide, 1200);
+            return;
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "Could not create PR automatically.";
+            setFeedback(`${message} Falling back to GitHub flow...`, true);
+          } finally {
+            setSubmitting(false);
+          }
+        }
+
+        const githubUrl = buildGithubCreateUrl({ company, type, amount, eligibility, category, stage, urlField });
+        if (!githubUrl) {
+          setFeedback("Submission failed. Configure PUBLIC_SUBMISSION_API_URL or PUBLIC_REPO_URL.", true);
+          return;
+        }
+
         window.open(githubUrl, "_blank");
-        if (feedback) feedback.textContent = "Redirecting to GitHub...";
+        setFeedback("Redirecting to GitHub...");
         setTimeout(hide, 1500);
       };
     }
@@ -271,6 +358,14 @@ Added via ledger submit form.
     gap: 1rem;
   }
 
+  .field-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
   .segmented-control {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -321,12 +416,21 @@ Added via ledger submit form.
     width: 100%;
   }
 
+  .full-width:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
   .feedback {
     font-size: 0.85rem;
     font-weight: 600;
     color: #0d7a64;
     text-align: center;
     margin: 0;
+  }
+
+  .feedback.is-error {
+    color: #b42318;
   }
 
   @media (max-width: 480px) {

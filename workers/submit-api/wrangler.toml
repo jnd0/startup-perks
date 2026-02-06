@@ -1,0 +1,6 @@
+name = "startup-perks-submit-api"
+main = "src/index.ts"
+compatibility_date = "2026-02-06"
+
+[observability]
+enabled = true

@@ -6,6 +6,8 @@ Thanks for helping founders save time.
 
 Preferred fast path: use the homepage `Submit perk` form to open a prefilled GitHub PR flow.
 
+If the site is configured with `PUBLIC_SUBMISSION_API_URL`, the same form can create a draft PR automatically without requiring the submitter to have a GitHub account.
+
 1. Create a file in `src/content/perks/` using kebab-case.
 2. Add frontmatter using the template below.
 3. Add a short body note with context or caveats.
