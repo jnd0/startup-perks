@@ -52,6 +52,13 @@ bun run build
 bunx wrangler pages deploy dist --project-name startupperks
 ```
 
+If you want to publish as a Worker with static assets instead of Pages, this repo includes `wrangler.jsonc`.
+
+```bash
+bun run build
+bunx wrangler deploy
+```
+
 Notes:
 
 - This project is static Astro output (`dist/`), so no Cloudflare adapter is required.
