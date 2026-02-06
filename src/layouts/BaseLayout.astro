@@ -67,6 +67,52 @@ const jsonLd = structuredData ? JSON.stringify(structuredData) : "";
     />
     {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <ClientRouter />
+    <style is:global>
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 170ms;
+        animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      ::view-transition-old(root) {
+        animation-name: sp-fade-out;
+      }
+
+      ::view-transition-new(root) {
+        animation-name: sp-fade-in;
+      }
+
+      @keyframes sp-fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px) scale(0.998);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes sp-fade-out {
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+
+        to {
+          opacity: 0;
+          transform: translateY(-4px) scale(1.002);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation-duration: 1ms;
+        }
+      }
+    </style>
   </head>
   <body>
     <slot />

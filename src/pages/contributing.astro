@@ -2,9 +2,76 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
+const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
+const rootUrl = new URL("/", siteUrl).toString();
+const canonicalUrl = new URL("/contributing/", siteUrl).toString();
+const organizationId = `${rootUrl}#organization`;
+const websiteId = `${rootUrl}#website`;
+const pageId = `${canonicalUrl}#webpage`;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: "StartupPerks",
+      url: rootUrl,
+      logo: new URL("/favicon.svg", siteUrl).toString(),
+      sameAs: [repositoryUrl],
+    },
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      name: "StartupPerks",
+      url: rootUrl,
+      inLanguage: "en",
+      publisher: {
+        "@id": organizationId,
+      },
+    },
+    {
+      "@type": "WebPage",
+      "@id": pageId,
+      url: canonicalUrl,
+      name: "Contributing | StartupPerks",
+      description: "How to contribute startup perks to the open-source StartupPerks directory.",
+      inLanguage: "en",
+      isPartOf: {
+        "@id": websiteId,
+      },
+      publisher: {
+        "@id": organizationId,
+      },
+    },
+    {
+      "@type": "HowTo",
+      "@id": `${canonicalUrl}#howto`,
+      name: "How to add a startup perk",
+      description: "Step-by-step process for contributing a new startup perk entry to StartupPerks.",
+      totalTime: "PT10M",
+      step: [
+        { "@type": "HowToStep", position: 1, text: "Fork the repository." },
+        { "@type": "HowToStep", position: 2, text: "Add one Markdown file in src/content/perks." },
+        { "@type": "HowToStep", position: 3, text: "Fill all required frontmatter fields." },
+        { "@type": "HowToStep", position: 4, text: "Run bun run check." },
+        { "@type": "HowToStep", position: 5, text: "Open a pull request with source links." },
+      ],
+      url: canonicalUrl,
+      mainEntityOfPage: {
+        "@id": pageId,
+      },
+    },
+  ],
+};
 ---
 
-<BaseLayout title="Contributing - StartupPerks" description="How to contribute startup perks to the open-source StartupPerks directory.">
+<BaseLayout
+  title="Contributing | StartupPerks"
+  description="How to contribute startup perks to the open-source StartupPerks directory."
+  canonicalUrl={canonicalUrl}
+  structuredData={structuredData}
+>
   <main class="page-shell">
     <section class="card contribute">
       <p class="contribute__eyebrow">Contribute in minutes</p>
@@ -28,7 +95,7 @@ const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd
         )
       }
 
-      <a class="button button-primary" href="/">Back to perks</a>
+      <a class="button contribute-back-link" href="/">Back to perks</a>
     </section>
   </main>
 </BaseLayout>
@@ -71,5 +138,17 @@ const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd
 
   .button {
     margin-top: 1rem;
+  }
+
+  .contribute-back-link {
+    background: #fff;
+    color: var(--fg);
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .contribute-back-link:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
   }
 </style>

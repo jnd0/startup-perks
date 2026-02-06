@@ -30,22 +30,82 @@ const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd
 const repositoryBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? "main";
 const submissionApiUrl = import.meta.env.PUBLIC_SUBMISSION_API_URL ?? "";
 const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
+const rootUrl = new URL("/", siteUrl).toString();
 const canonicalUrl = new URL(`/perks/${perk.id}/`, siteUrl).toString();
-const pageTitle = `${data.company} for Startups: ${data.amountDisplay} | StartupPerks`;
-const pageDescription = data.summary;
+const normalizeSpaces = (value: string) => value.replace(/\s+/g, " ").trim();
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value;
+  const trimmed = value.slice(0, maxLength - 1).replace(/\s+\S*$/, "").trimEnd();
+  return `${trimmed}.`;
+};
+
+const pageTitle = `${data.company} Startup Credits and Perks | StartupPerks`;
+const rawDescription = normalizeSpaces(
+  `${data.company} startup perk offers ${data.amountDisplay}. Eligibility: ${data.eligibility}. Includes source links and category details.`
+);
+const pageDescription = truncateText(rawDescription, 160);
 const noindex = !data.isActive;
+const lastVerifiedIso = data.lastVerified.toISOString();
+const organizationId = `${rootUrl}#organization`;
+const websiteId = `${rootUrl}#website`;
+const breadcrumbId = `${canonicalUrl}#breadcrumbs`;
+
+const offerEntity: Record<string, unknown> = {
+  "@type": "Offer",
+  name: data.title,
+  description: data.summary,
+  url: data.applyUrl,
+  category: data.perkType,
+  availability: data.isActive
+    ? "https://schema.org/InStock"
+    : "https://schema.org/Discontinued",
+  seller: {
+    "@id": organizationId,
+  },
+  eligibleRegion: data.regions.map((region: string) => ({
+    "@type": "Place",
+    name: region,
+  })),
+};
+
+if (typeof data.creditValueUsd === "number") {
+  offerEntity.priceSpecification = {
+    "@type": "PriceSpecification",
+    priceCurrency: data.currency,
+    price: data.creditValueUsd,
+  };
+}
 
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: "StartupPerks",
+      url: rootUrl,
+      logo: new URL("/favicon.svg", siteUrl).toString(),
+      sameAs: [repositoryUrl],
+    },
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      name: "StartupPerks",
+      url: rootUrl,
+      inLanguage: "en",
+      publisher: {
+        "@id": organizationId,
+      },
+    },
+    {
       "@type": "BreadcrumbList",
+      "@id": breadcrumbId,
       itemListElement: [
         {
           "@type": "ListItem",
           position: 1,
           name: "StartupPerks",
-          item: new URL("/", siteUrl).toString(),
+          item: rootUrl,
         },
         {
           "@type": "ListItem",
@@ -62,20 +122,21 @@ const structuredData = {
       name: pageTitle,
       description: pageDescription,
       inLanguage: "en",
+      publisher: {
+        "@id": organizationId,
+      },
+      isPartOf: {
+        "@id": websiteId,
+      },
+      breadcrumb: {
+        "@id": breadcrumbId,
+      },
+      dateModified: lastVerifiedIso,
       about: {
         "@type": "Thing",
         name: data.company,
       },
-      mainEntity: {
-        "@type": "Offer",
-        name: data.title,
-        description: data.summary,
-        url: data.applyUrl,
-        category: data.perkType,
-        availability: data.isActive
-          ? "https://schema.org/InStock"
-          : "https://schema.org/Discontinued",
-      },
+      mainEntity: offerEntity,
     },
   ],
 };
@@ -104,7 +165,7 @@ const structuredData = {
             <span class="co-name">{data.company}</span>
             {data.verified && <span class="verified-pill">Verified</span>}
           </div>
-          <h1 class="title" transition:name={`perk-title-${perk.id}`}>
+          <h1 class="title">
             {data.amountDisplay}
           </h1>
           <p class="summary-lead">{data.summary}</p>
@@ -179,7 +240,7 @@ const structuredData = {
             <h2>Related</h2>
             <div class="related-stack">
               {relatedPerks.map((p: CollectionEntry<"perks">) => (
-                <a href={`/perks/${p.id}`} class="related-item">
+                <a href={`/perks/${p.id}/`} class="related-item">
                   <span class="rel-co">{p.data.company}</span>
                   <span class="rel-amt">{p.data.amountDisplay}</span>
                 </a>
