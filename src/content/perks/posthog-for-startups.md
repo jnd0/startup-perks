@@ -16,7 +16,7 @@ regions:
 categories:
   - Analytics
   - Developer Tools
-applyUrl: https://posthog.com/
+applyUrl: https://posthog.com/handbook/brand/startups
 sourceUrl: https://posthog.com/
 lastVerified: 2026-02-06
 verified: false

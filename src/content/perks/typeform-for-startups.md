@@ -14,7 +14,7 @@ regions:
 categories:
   - Product
   - Marketing
-applyUrl: https://www.typeform.com/
+applyUrl: https://www.typeform.com/typeform-startups
 sourceUrl: https://www.typeform.com/
 lastVerified: 2026-02-06
 verified: false

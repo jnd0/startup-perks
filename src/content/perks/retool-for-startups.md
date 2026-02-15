@@ -16,7 +16,7 @@ regions:
 categories:
   - Developer Tools
   - Productivity
-applyUrl: https://retool.com/
+applyUrl: https://retool.com/startups
 sourceUrl: https://retool.com/
 lastVerified: 2026-02-06
 verified: false

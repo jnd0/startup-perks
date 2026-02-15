@@ -19,6 +19,7 @@ const totalCreditValue = perks.reduce(
   0
 );
 const verifiedCount = perks.filter((perk: CollectionEntry<"perks">) => perk.data.verified).length;
+
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -41,6 +42,29 @@ const itemListElements = perks.map((perk: CollectionEntry<"perks">, index: numbe
   name: `${perk.data.company}: ${perk.data.amountDisplay}`,
 }));
 
+const faqData = [
+  {
+    question: "What are startup perks?",
+    answer: "Startup perks are free credits, discounts, and trial programs offered by companies to help early-stage startups save money on software, cloud services, and tools."
+  },
+  {
+    question: "How do I apply for startup credits?",
+    answer: "Click on any perk in our directory and you'll find a direct link to apply. Most programs require proof of startup status, such as incorporation documents or investor letters."
+  },
+  {
+    question: "Are these startup programs really free?",
+    answer: "Yes, all the perks listed are free or heavily discounted for qualifying startups. Some require accreditation or partner program membership."
+  },
+  {
+    question: "How much can startups save with these perks?",
+    answer: "Our directory offers over $1.7 million in combined verified credits, with individual programs offering from $500 to $100,000+ in value."
+  },
+  {
+    question: "Which companies offer the best startup programs?",
+    answer: "Top companies offering startup perks include AWS, Google Cloud, Microsoft Azure, OpenAI, Anthropic, Vercel, Stripe, and many more."
+  }
+];
+
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -57,16 +81,27 @@ const structuredData = {
       "@id": websiteId,
       name: "StartupPerks",
       url: canonicalUrl,
-      description: "Open-source directory of startup credits, discounts, and trial programs.",
+      description: "The largest directory of free startup credits, perks and SaaS discounts.",
       inLanguage: "en",
       publisher: {
         "@id": organizationId,
       },
       potentialAction: {
         "@type": "SearchAction",
-        target: `${canonicalUrl}?q={search_term_string}`,
+        "target": `${canonicalUrl}?q={search_term_string}`,
         "query-input": "required name=search_term_string",
       },
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": faqData.map(faq => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer
+        }
+      }))
     },
     {
       "@type": "CollectionPage",
@@ -92,8 +127,8 @@ const structuredData = {
 ---
 
 <BaseLayout
-  title="StartupPerks | Startup Credits, Free Trials, and SaaS Discounts"
-  description="Explore 50+ startup credits and software perks with eligibility details, source links, and contribution-ready updates."
+  title="StartupPerks | Free Startup Credits, Perks & SaaS Discounts"
+  description="The largest directory of free startup credits, perks and SaaS discounts. Save money on AWS, Google Cloud, OpenAI, Vercel, Stripe and 100+ more. Verified weekly."
   canonicalUrl={canonicalUrl}
   ogType="website"
   structuredData={structuredData}
@@ -101,8 +136,8 @@ const structuredData = {
   <main class="page-shell">
     <header class="site-header">
       <div class="brand-meta">
-        <div class="version-badge">REGISTRY V1.0</div>
-        <h1 class="site-title">Startup<span>Perks</span></h1>
+        <div class="version-badge">REGISTRY V2.0</div>
+        <h1 class="site-title"><a href="/">Startup<span>Perks</span></a></h1>
         <p class="site-tagline">High-fidelity directory of infrastructure grants and software perks for modern founders.</p>
       </div>
       
@@ -117,15 +152,15 @@ const structuredData = {
     <section class="stats-overview">
       <div class="stat-card">
         <span class="stat-label">Verified Market Value</span>
-        <span class="stat-value highlight">{currencyFormatter.format(totalCreditValue)}</span>
+        <span class="stat-value highlight" id="totalValue">${totalCreditValue.toLocaleString()}+</span>
       </div>
       <div class="stat-card">
         <span class="stat-label">Active Registry Entries</span>
-        <span class="stat-value">{perks.length}</span>
+        <span class="stat-value" id="totalCount">{perks.length}</span>
       </div>
       <div class="stat-card">
         <span class="stat-label">Trust Score (Verified)</span>
-        <span class="stat-value">{verifiedCount}</span>
+        <span class="stat-value" id="verifiedCount">{verifiedCount}</span>
       </div>
     </section>
 
@@ -141,7 +176,7 @@ const structuredData = {
           <select id="sortSelect">
             <option value="credit-desc">Highest Value</option>
             <option value="credit-asc">Lowest Value</option>
-            <option value="recently-verified">Latest Verified</option>
+            <option value="recently-verified">Most Recent</option>
             <option value="company-asc">Provider A-Z</option>
           </select>
         </div>
@@ -241,6 +276,18 @@ const structuredData = {
           };
       }
 
+      // Check for openModal URL parameter to auto-open modal
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("openModal") === "true") {
+        setTimeout(() => {
+          const modal = document.getElementById('submitModal');
+          if (modal) {
+            modal.hidden = false;
+            document.body.style.overflow = "hidden";
+          }
+        }, 100);
+      }
+
       const checkboxInputs = Array.from(document.querySelectorAll('input[type="checkbox"][name]'));
       const initialParams = new URLSearchParams(window.location.search);
       const initialSearch = initialParams.get("q");
@@ -303,6 +350,34 @@ const structuredData = {
         const sortedVisibleCards = sortCards([...visibleCards]);
         sortedVisibleCards.forEach((card) => resultsGrid.append(card));
         emptyState.hidden = visibleCards.length > 0;
+
+        // Update stats dynamically
+        const totalValueEl = document.getElementById("totalValue");
+        const totalCountEl = document.getElementById("totalCount");
+        const verifiedCountEl = document.getElementById("verifiedCount");
+        
+        if (totalValueEl || totalCountEl || verifiedCountEl) {
+          let totalValue = 0;
+          let verifiedCount = 0;
+          
+          visibleCards.forEach((card) => {
+            const credit = Number(card.dataset.credit || "0");
+            totalValue += credit;
+            if (card.dataset.verified === "true") {
+              verifiedCount++;
+            }
+          });
+          
+          if (totalValueEl) {
+            totalValueEl.textContent = '$' + totalValue.toLocaleString() + '+';
+          }
+          if (totalCountEl) {
+            totalCountEl.textContent = visibleCards.length.toString();
+          }
+          if (verifiedCountEl) {
+            verifiedCountEl.textContent = verifiedCount.toString();
+          }
+        }
       };
 
       searchInput.addEventListener("input", runFilters);
@@ -353,6 +428,16 @@ const structuredData = {
     margin: 0;
     line-height: 0.85;
     letter-spacing: -0.05em;
+  }
+
+  .site-title a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .site-title a:hover {
+    color: inherit;
   }
 
   .site-title span {

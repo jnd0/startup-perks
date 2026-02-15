@@ -14,7 +14,7 @@ regions:
 categories:
   - Security
   - Developer Tools
-applyUrl: https://clerk.com/
+applyUrl: https://clerk.com/startups
 sourceUrl: https://clerk.com/
 lastVerified: 2026-02-06
 verified: false
