@@ -14,7 +14,7 @@ regions:
 categories:
   - Collaboration
   - Productivity
-applyUrl: https://miro.com/
+applyUrl: https://miro.com/startups/
 sourceUrl: https://miro.com/
 lastVerified: 2026-02-06
 verified: false

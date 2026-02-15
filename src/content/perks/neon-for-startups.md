@@ -14,7 +14,7 @@ regions:
 categories:
   - Database
   - Cloud
-applyUrl: https://neon.com/
+applyUrl: https://neon.com/startups
 sourceUrl: https://neon.com/
 lastVerified: 2026-02-06
 verified: false

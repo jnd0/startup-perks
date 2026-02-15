@@ -14,7 +14,7 @@ regions:
 categories:
   - Analytics
   - Product
-applyUrl: https://amplitude.com/
+applyUrl: https://amplitude.com/startups
 sourceUrl: https://amplitude.com/
 lastVerified: 2026-02-06
 verified: false

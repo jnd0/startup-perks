@@ -14,7 +14,7 @@ regions:
 categories:
   - Database
   - Developer Tools
-applyUrl: https://planetscale.com/
+applyUrl: https://planetscale.com/startups
 sourceUrl: https://planetscale.com/
 lastVerified: 2026-02-06
 verified: false
