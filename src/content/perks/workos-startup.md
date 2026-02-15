@@ -4,6 +4,7 @@ title: WorkOS for Startups
 summary: Enterprise-grade identity and auth for startups. Modern SSO, SAML, and directory sync at startup-friendly pricing.
 perkType: discount
 amountDisplay: Startup pricing available
+creditValueUsd: 2000
 eligibility: Early-stage startups needing enterprise auth features.
 fundingStages:
   - Pre-seed

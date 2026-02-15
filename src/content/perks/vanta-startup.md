@@ -4,6 +4,7 @@ title: Vanta for Startups
 summary: Automated security compliance for startups. The fastest path to SOC 2, ISO 27001, and other certifications.
 perkType: discount
 amountDisplay: Startup pricing available
+creditValueUsd: 2000
 eligibility: Early-stage startups pursuing security compliance certifications.
 fundingStages:
   - Pre-seed

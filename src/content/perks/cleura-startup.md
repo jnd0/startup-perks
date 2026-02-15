@@ -23,4 +23,4 @@ verified: false
 isActive: true
 ---
 
-Cleura (formerly Cleura) provides a European sovereign cloud alternative with focus on data privacy and compliance. Startups get free access to build faster while staying compliant on an open-source foundation they'll never outgrow.
+Cleura provides a European sovereign cloud alternative with focus on data privacy and compliance. Startups get free access to build faster while staying compliant on an open-source foundation they'll never outgrow.

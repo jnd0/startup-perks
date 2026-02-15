@@ -19,6 +19,16 @@ const totalCreditValue = perks.reduce(
   0
 );
 const verifiedCount = perks.filter((perk: CollectionEntry<"perks">) => perk.data.verified).length;
+
+function formatValue(value: number): string {
+  if (value >= 1000000) {
+    return '$' + (value / 1000000).toFixed(1).replace(/\.0$/, '') + 'M+';
+  } else if (value >= 1000) {
+    return '$' + Math.round(value / 1000) + 'K+';
+  }
+  return '$' + value.toLocaleString() + '+';
+}
+
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -151,7 +161,7 @@ const structuredData = {
     <section class="stats-overview">
       <div class="stat-card">
         <span class="stat-label">Verified Market Value</span>
-        <span class="stat-value highlight" id="totalValue">${totalCreditValue.toLocaleString()}+</span>
+        <span class="stat-value highlight" id="totalValue">${formatValue(totalCreditValue)}</span>
       </div>
       <div class="stat-card">
         <span class="stat-label">Active Registry Entries</span>
@@ -368,7 +378,15 @@ const structuredData = {
           });
           
           if (totalValueEl) {
-            totalValueEl.textContent = '$' + totalValue.toLocaleString() + '+';
+            function formatValue(value: number): string {
+              if (value >= 1000000) {
+                return '$' + (value / 1000000).toFixed(1).replace(/\.0$/, '') + 'M+';
+              } else if (value >= 1000) {
+                return '$' + Math.round(value / 1000) + 'K+';
+              }
+              return '$' + value.toLocaleString() + '+';
+            }
+            totalValueEl.textContent = formatValue(totalValue);
           }
           if (totalCountEl) {
             totalCountEl.textContent = visibleCards.length.toString();

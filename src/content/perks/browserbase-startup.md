@@ -4,6 +4,7 @@ title: Browserbase for Startups
 summary: Browser automation infrastructure for AI applications. Scalable browser instances for web scraping, testing, and AI agents.
 perkType: credit
 amountDisplay: Startup credits
+creditValueUsd: 5000
 eligibility: AI startups building browser-based applications or web automation.
 fundingStages:
   - Pre-seed

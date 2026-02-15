@@ -4,6 +4,7 @@ title: Braintrust for Startups
 summary: AI evaluation and testing platform for startups. Build, test, and evaluate AI agents and LLM applications.
 perkType: credit
 amountDisplay: Startup credits
+creditValueUsd: 5000
 eligibility: AI startups building LLM applications or AI agents needing evaluation tools.
 fundingStages:
   - Pre-seed
