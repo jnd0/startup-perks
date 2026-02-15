@@ -15,8 +15,8 @@ regions:
 categories:
   - AI
   - Developer Tools
-applyUrl: https://cohere.com/startup
-sourceUrl: https://cohere.com/startup
+applyUrl: https://cohere.com
+sourceUrl: https://cohere.com
 lastVerified: 2026-02-14
 verified: false
 isActive: true

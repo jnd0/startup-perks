@@ -15,8 +15,8 @@ regions:
 categories:
   - Web3
   - Blockchain
-applyUrl: https://www.alchemy.com/startups
-sourceUrl: https://www.alchemy.com/startups
+applyUrl: https://www.alchemy.com/startup-program
+sourceUrl: https://www.alchemy.com/startup-program
 lastVerified: 2026-02-14
 verified: false
 isActive: true

@@ -15,8 +15,8 @@ regions:
 categories:
   - Security
   - Cloud
-applyUrl: https://wiz.io/startups/
-sourceUrl: https://wiz.io/startups/
+applyUrl: https://www.wiz.io/lp/startups
+sourceUrl: https://www.wiz.io/lp/startups
 lastVerified: 2026-02-14
 verified: false
 isActive: true

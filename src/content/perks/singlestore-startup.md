@@ -15,8 +15,8 @@ regions:
 categories:
   - Database
   - Analytics
-applyUrl: https://www.singlestore.com/startup/
-sourceUrl: https://www.singlestore.com/startup/
+applyUrl: https://www.singlestore.com/pricing/
+sourceUrl: https://www.singlestore.com/pricing/
 lastVerified: 2026-02-14
 verified: false
 isActive: true

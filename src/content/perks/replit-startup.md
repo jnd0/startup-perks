@@ -15,8 +15,8 @@ regions:
 categories:
   - Developer Tools
   - Cloud
-applyUrl: https://replit.com/startups
-sourceUrl: https://replit.com/startups
+applyUrl: https://replit.com/pricing
+sourceUrl: https://replit.com/pricing
 lastVerified: 2026-02-14
 verified: false
 isActive: true

@@ -15,8 +15,8 @@ regions:
 categories:
   - Database
   - Analytics
-applyUrl: https://clickhouse.com/cloud/signup
-sourceUrl: https://clickhouse.com/cloud/signup
+applyUrl: https://clickhouse.com/cloud
+sourceUrl: https://clickhouse.com/cloud
 lastVerified: 2026-02-14
 verified: false
 isActive: true

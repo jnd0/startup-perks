@@ -15,8 +15,8 @@ regions:
 categories:
   - AI
   - Developer Tools
-applyUrl: https://www.ai21.com/startup
-sourceUrl: https://www.ai21.com/startup
+applyUrl: https://www.ai21.com
+sourceUrl: https://www.ai21.com
 lastVerified: 2026-02-14
 verified: false
 isActive: true

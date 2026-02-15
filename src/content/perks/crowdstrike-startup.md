@@ -14,8 +14,8 @@ regions:
   - Global
 categories:
   - Security
-applyUrl: https://www.crowdstrike.com/startups/
-sourceUrl: https://www.crowdstrike.com/startups/
+applyUrl: https://www.crowdstrike.com
+sourceUrl: https://www.crowdstrike.com
 lastVerified: 2026-02-14
 verified: false
 isActive: true

@@ -14,8 +14,8 @@ regions:
   - Global
 categories:
   - Developer Tools
-applyUrl: https://warp.dev/startups
-sourceUrl: https://warp.dev/startups
+applyUrl: https://warp.dev/pricing
+sourceUrl: https://warp.dev/pricing
 lastVerified: 2026-02-14
 verified: false
 isActive: true

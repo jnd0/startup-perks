@@ -15,8 +15,8 @@ regions:
 categories:
   - Web3
   - Blockchain
-applyUrl: https://infura.io/startups
-sourceUrl: https://infura.io/startups
+applyUrl: https://infura.io
+sourceUrl: https://infura.io
 lastVerified: 2026-02-14
 verified: false
 isActive: true

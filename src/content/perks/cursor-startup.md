@@ -15,8 +15,8 @@ regions:
 categories:
   - Developer Tools
   - AI
-applyUrl: https://cursor.sh/startup
-sourceUrl: https://cursor.sh/startup
+applyUrl: https://cursor.sh/pricing
+sourceUrl: https://cursor.sh/pricing
 lastVerified: 2026-02-14
 verified: false
 isActive: true

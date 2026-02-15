@@ -15,8 +15,8 @@ regions:
 categories:
   - Database
   - Analytics
-applyUrl: https://www.timescale.com/startup/
-sourceUrl: https://www.timescale.com/startup/
+applyUrl: https://www.timescale.com/cloud/
+sourceUrl: https://www.timescale.com/cloud/
 lastVerified: 2026-02-14
 verified: false
 isActive: true

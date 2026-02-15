@@ -16,8 +16,8 @@ categories:
   - Cloud
   - Database
   - Infrastructure
-applyUrl: https://www.oracle.com/startup-cloud/
-sourceUrl: https://www.oracle.com/startup-cloud/
+applyUrl: https://www.oracle.com/cloud/oracle-for-startups/
+sourceUrl: https://www.oracle.com/cloud/oracle-for-startups/
 lastVerified: 2026-02-14
 verified: false
 isActive: true

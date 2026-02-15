@@ -16,8 +16,8 @@ categories:
   - Web3
   - Blockchain
   - Fintech
-applyUrl: https://0x.org/jumpstart
-sourceUrl: https://0x.org/jumpstart
+applyUrl: https://0x.org
+sourceUrl: https://0x.org
 lastVerified: 2026-02-14
 verified: false
 isActive: true

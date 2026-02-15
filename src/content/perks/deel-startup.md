@@ -15,8 +15,8 @@ regions:
 categories:
   - HR
   - Payroll
-applyUrl: https://www.deel.com/lp/deel-for-startups/
-sourceUrl: https://www.deel.com/lp/deel-for-startups/
+applyUrl: https://www.deel.com
+sourceUrl: https://www.deel.com
 lastVerified: 2026-02-14
 verified: false
 isActive: true
