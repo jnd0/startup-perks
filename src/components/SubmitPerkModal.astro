@@ -108,6 +108,12 @@ const stages = ["Bootstrap", "Seed", "Series A", "Series B+"];
     const hide = () => {
       modal.hidden = true;
       document.body.style.overflow = "";
+      // Clear the openModal URL parameter
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("openModal") === "true") {
+        url.searchParams.delete("openModal");
+        window.history.replaceState({}, "", url.toString());
+      }
     };
 
     const show = () => {

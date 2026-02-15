@@ -34,8 +34,8 @@ const structuredData = {
       "@type": "WebPage",
       "@id": pageId,
       url: canonicalUrl,
-      name: "Contributing | StartupPerks",
-      description: "How to contribute startup perks to the open-source StartupPerks directory.",
+      name: "Submit a Perk | StartupPerks",
+      description: "How to submit a startup perk to the open-source StartupPerks directory.",
       inLanguage: "en",
       isPartOf: {
         "@id": websiteId,
@@ -47,15 +47,14 @@ const structuredData = {
     {
       "@type": "HowTo",
       "@id": `${canonicalUrl}#howto`,
-      name: "How to add a startup perk",
+      name: "How to submit a startup perk",
       description: "Step-by-step process for contributing a new startup perk entry to StartupPerks.",
-      totalTime: "PT10M",
+      totalTime: "PT5M",
       step: [
-        { "@type": "HowToStep", position: 1, text: "Fork the repository." },
-        { "@type": "HowToStep", position: 2, text: "Add one Markdown file in src/content/perks." },
-        { "@type": "HowToStep", position: 3, text: "Fill all required frontmatter fields." },
-        { "@type": "HowToStep", position: 4, text: "Run bun run check." },
-        { "@type": "HowToStep", position: 5, text: "Open a pull request with source links." },
+        { "@type": "HowToStep", position: 1, text: "Use the Submit Perk form on the homepage." },
+        { "@type": "HowToStep", position: 2, text: "Fill in the perk details and source links." },
+        { "@type": "HowToStep", position: 3, text: "Submit to create a prefilled GitHub PR." },
+        { "@type": "HowToStep", position: 4, text: "Our team reviews and verifies the submission." },
       ],
       url: canonicalUrl,
       mainEntityOfPage: {
@@ -67,88 +66,291 @@ const structuredData = {
 ---
 
 <BaseLayout
-  title="Contributing | StartupPerks"
-  description="How to contribute startup perks to the open-source StartupPerks directory."
+  title="Submit a Perk | StartupPerks"
+  description="How to submit a startup perk to the open-source StartupPerks directory."
   canonicalUrl={canonicalUrl}
   structuredData={structuredData}
 >
   <main class="page-shell">
-    <section class="card contribute">
-      <p class="contribute__eyebrow">Contribute in minutes</p>
-      <h1>How to add a startup perk</h1>
-      <ol>
-        <li>Fork the repository.</li>
-        <li>Add one Markdown file in <code>src/content/perks</code>.</li>
-        <li>Fill all required frontmatter fields.</li>
-        <li>Run <code>bun run check</code>.</li>
-        <li>Open a pull request with source links.</li>
-      </ol>
+    <header class="site-header">
+      <div class="brand-meta">
+        <div class="version-badge">REGISTRY V2.0</div>
+        <h1 class="site-title">Submit a <span>Perk</span></h1>
+        <p class="site-tagline">Add to our open-source directory of infrastructure grants and software perks for modern founders.</p>
+      </div>
+    </header>
 
-      <p>Full guidance and the copy/paste template are in <code>CONTRIBUTING.md</code> at the repository root.</p>
-      <p>You can also use the homepage <code>Submit perk</code> form to open a prefilled GitHub PR flow.</p>
+    <section class="submit-options">
+      <div class="option-card primary">
+        <div class="option-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <h2>Quick Submit</h2>
+        <p>Use the form on our homepage to submit a new perk. It automatically creates a prefilled GitHub pull request.</p>
+        <a href="/?openModal=true" class="button button-primary">Go to Submit Form</a>
+      </div>
 
-      {
-        repositoryUrl && (
-          <p>
-            Repo URL configured: <a href={repositoryUrl}>{repositoryUrl}</a>
-          </p>
-        )
-      }
-
-      <a class="button contribute-back-link" href="/">Back to perks</a>
+      <div class="option-card">
+        <div class="option-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </div>
+        <h2>Manual Submission</h2>
+        <p>Fork our repository, add a Markdown file in <code>src/content/perks</code>, and open a pull request.</p>
+        <a href={repositoryUrl} target="_blank" rel="noopener" class="button button-secondary">View Repository</a>
+      </div>
     </section>
+
+    <section class="info-card">
+      <h3>What happens after submission?</h3>
+      <ol class="steps-list">
+        <li><strong>Review:</strong> Our team reviews your submission for accuracy.</li>
+        <li><strong>Verification:</strong> We verify the perk is still active and update the verified status.</li>
+        <li><strong>Publication:</strong> Once approved, your perk is added to the registry.</li>
+      </ol>
+    </section>
+
+    <section class="info-card">
+      <h3>Found a bug or issue?</h3>
+      <p>If you notice any incorrect information, broken links, or other issues with existing perks, please email us at <a href="mailto:admin@startup-perks.com">admin@startup-perks.com</a> and we'll look into it right away.</p>
+    </section>
+
+    <a class="back-link" href="/">← Back to all perks</a>
   </main>
 </BaseLayout>
 
 <style>
-  .contribute {
-    padding: clamp(1.1rem, 2vw + 0.9rem, 2rem);
+  .site-header {
+    padding: 3rem 0 1.5rem;
+    margin-bottom: 1rem;
   }
 
-  .contribute__eyebrow {
-    margin: 0;
-    font-size: 0.8rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .version-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
     font-weight: 700;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.1em;
   }
 
-  h1 {
-    margin: 0.3rem 0 0;
-    font-family: "Newsreader", Georgia, serif;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
+  .site-title {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 800;
+    margin: 0;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
   }
 
-  ol {
-    margin: 1rem 0;
-    padding-left: 1.2rem;
-    color: var(--text);
-    line-height: 1.55;
+  .site-title span {
+    color: #cbd5e1;
+    font-weight: 400;
   }
 
-  p {
-    margin: 0.75rem 0 0;
+  .site-tagline {
+    font-size: 1rem;
     color: var(--muted);
+    margin: 0.75rem 0 0;
+    font-weight: 500;
+    line-height: 1.4;
   }
 
-  a {
-    color: inherit;
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .submit-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .option-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .option-card.primary {
+    background: #000;
+    border-color: #000;
+  }
+
+  .option-card.primary .site-tagline,
+  .option-card.primary p {
+    color: #a1a1aa;
+  }
+
+  .option-card.primary .option-icon {
+    background: #fff;
+    color: #000;
+  }
+
+  .option-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .option-card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .option-card.primary h2 {
+    color: #fff;
+  }
+
+  .option-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0 0 1.25rem;
   }
 
   .button {
-    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
   }
 
-  .contribute-back-link {
+  .button-primary {
     background: #fff;
-    color: var(--fg);
-    border-color: #cbd5e1;
-    box-shadow: var(--shadow-sm);
+    color: #000;
+    border: 1px solid #fff;
   }
 
-  .contribute-back-link:hover {
+  .button-primary:hover {
+    background: #f0f0f0;
+  }
+
+  .button-secondary {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--line);
+  }
+
+  .button-secondary:hover {
     border-color: #94a3b8;
-    background: #f8fafc;
+    background: var(--surface);
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .info-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .steps-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .steps-list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .steps-list strong {
+    color: var(--fg);
+  }
+
+  .info-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .info-card a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .info-card a:hover {
+    color: #000;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+
+  .back-link:hover {
+    color: var(--fg);
+  }
+
+  code {
+    background: var(--surface);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .stats-overview {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

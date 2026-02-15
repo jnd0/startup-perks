@@ -1,0 +1,213 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const repositoryUrl = import.meta.env.PUBLIC_REPO_URL ?? "https://github.com/jnd0/startup-perks";
+const siteUrl = Astro.site ?? new URL("https://startup-perks.com");
+const rootUrl = new URL("/", siteUrl).toString();
+const canonicalUrl = new URL("/faq/", siteUrl).toString();
+const organizationId = `${rootUrl}#organization`;
+const websiteId = `${rootUrl}#website`;
+
+const faqData = [
+  {
+    question: "What are startup perks?",
+    answer: "Startup perks are free credits, discounts, and trial programs offered by companies to help early-stage startups save money on software, cloud services, and tools."
+  },
+  {
+    question: "How do I apply for startup credits?",
+    answer: "Click on any perk in our directory and you'll find a direct link to apply. Most programs require proof of startup status, such as incorporation documents or investor letters."
+  },
+  {
+    question: "Are these startup programs really free?",
+    answer: "Yes, all the perks listed are free or heavily discounted for qualifying startups. Some require accreditation or partner program membership."
+  },
+  {
+    question: "How much can startups save with these perks?",
+    answer: "Our directory offers over $1.7 million in combined verified credits, with individual programs offering from $500 to $100,000+ in value."
+  },
+  {
+    question: "Which companies offer the best startup programs?",
+    answer: "Top companies offering startup perks include AWS, Google Cloud, Microsoft Azure, OpenAI, Anthropic, Vercel, Stripe, and many more."
+  },
+  {
+    question: "How can I submit a new perk?",
+    answer: "Use the Submit Perk button on our homepage or visit the contributing page. You can either use our automated form or submit manually via GitHub pull request."
+  },
+  {
+    question: "How do you verify the perks?",
+    answer: "We regularly verify all perks by checking the official program websites and updating our database. Look for the verified badge on perks that have been recently confirmed."
+  },
+  {
+    question: "Can I suggest changes to existing perks?",
+    answer: "Yes! If you notice any incorrect information or broken links, please email us at admin@startup-perks.com and we'll fix it right away."
+  }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": organizationId,
+      name: "StartupPerks",
+      url: rootUrl,
+      logo: new URL("/favicon.svg", siteUrl).toString(),
+      sameAs: [repositoryUrl],
+    },
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      name: "StartupPerks",
+      url: rootUrl,
+      inLanguage: "en",
+      publisher: {
+        "@id": organizationId,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": canonicalUrl,
+      "mainEntity": faqData.map(faq => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer
+        }
+      }))
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="FAQ | StartupPerks"
+  description="Frequently asked questions about startup perks, credits, and how to apply."
+  canonicalUrl={canonicalUrl}
+  structuredData={structuredData}
+>
+  <main class="page-shell">
+    <header class="site-header">
+      <div class="brand-meta">
+        <div class="version-badge">REGISTRY V2.0</div>
+        <h1 class="site-title">Frequently Asked <span>Questions</span></h1>
+        <p class="site-tagline">Everything you need to know about startup perks and credits.</p>
+      </div>
+    </header>
+
+    <section class="faq-list">
+      {faqData.map((faq, index) => (
+        <details class="faq-item">
+          <summary class="faq-question">
+            {faq.question}
+            <span class="faq-icon">+</span>
+          </summary>
+          <p class="faq-answer">{faq.answer}</p>
+        </details>
+      ))}
+    </section>
+
+    <a class="back-link" href="/">← Back to all perks</a>
+  </main>
+</BaseLayout>
+
+<style>
+  .site-header {
+    padding: 3rem 0 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .version-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  .site-title {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 800;
+    margin: 0;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+
+  .site-title span {
+    color: #cbd5e1;
+    font-weight: 400;
+  }
+
+  .site-tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 0.75rem 0 0;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .faq-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .faq-question {
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-icon {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+  }
+
+  .faq-item[open] .faq-icon {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    padding: 0 1.5rem 1.25rem;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+
+  .back-link:hover {
+    color: var(--fg);
+  }
+</style>
