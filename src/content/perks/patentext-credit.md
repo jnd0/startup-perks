@@ -11,7 +11,7 @@ fundingStages:
 regions:
   - "Global"
 categories:
-  - "AI"
+  - "Legal"
 applyUrl: "https://www.patentext.com/startup-program/"
 sourceUrl: "https://www.patentext.com/startup-program/"
 lastVerified: 2026-08-28
