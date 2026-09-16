@@ -3,6 +3,9 @@ dist/
 # generated types
 .astro/
 
+# generated redirect map (functions bundle input)
+functions/go/_map.ts
+
 # dependencies
 node_modules/
 

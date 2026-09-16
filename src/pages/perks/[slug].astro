@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SubmitPerkModal from "../../components/SubmitPerkModal.astro";
+import { REDIRECTS } from "../../../functions/go/_map";
 
 export async function getStaticPaths() {
   const perks = await getCollection("perks");
@@ -21,6 +22,7 @@ interface Props {
 const { perk } = Astro.props;
 const { data } = perk;
 const { Content } = await render(perk);
+const trackedSlug = REDIRECTS[perk.id] ? perk.id : null;
 
 // Get related perks
 const allPerks = await getCollection("perks");
@@ -174,7 +176,7 @@ const structuredData = {
         </div>
         
         <div class="header-action-box">
-          <a href={data.applyUrl} target="_blank" rel="noopener noreferrer" class="button button-primary large">
+          <a href={trackedSlug ? `/go/${trackedSlug}/` : data.applyUrl} target="_blank" rel="noopener noreferrer" class="button button-primary large">
             Claim Offer
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
           </a>
