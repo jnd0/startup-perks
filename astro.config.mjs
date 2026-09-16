@@ -25,7 +25,7 @@ function buildRedirectMap(rootDir) {
 }
 
 function writeRedirectMap(rootDir) {
-  const redirects = buildRedirectMap(rootDir);
+  const redirects = process.env.DISABLE_REDIRECTS === '1' ? {} : buildRedirectMap(rootDir);
   const entries = Object.keys(redirects)
     .sort()
     .map((slug) => `  ${JSON.stringify(slug)}: ${JSON.stringify(redirects[slug])},`)
@@ -34,14 +34,38 @@ function writeRedirectMap(rootDir) {
   const mapPath = path.join(rootDir, REDIRECT_MAP_FILE);
   fs.mkdirSync(path.dirname(mapPath), { recursive: true });
   fs.writeFileSync(mapPath, contents);
+  return redirects;
+}
+
+function makeDevGoMiddleware(redirects) {
+  return (req, res, next) => {
+    const url = req.url ?? '';
+    const method = req.method ?? 'GET';
+    if (!url.startsWith('/go/') || (method !== 'GET' && method !== 'HEAD')) return next();
+    const slug = decodeURIComponent(url.replace(/^\/go\//, '').replace(/[/?].*$/, ''));
+    const target = redirects[slug];
+    if (!target || !/^https?:\/\//.test(target)) {
+      res.statusCode = 302;
+      res.setHeader('Location', '/');
+      res.end();
+      return;
+    }
+    res.statusCode = 302;
+    res.setHeader('Location', target);
+    res.end();
+  };
 }
 
 function redirectMap() {
+  let redirects = {};
   return {
     name: 'redirect-map',
     hooks: {
       'astro:config:setup': () => {
-        writeRedirectMap(process.cwd());
+        redirects = writeRedirectMap(process.cwd());
+      },
+      'astro:server:setup': ({ server }) => {
+        server.middlewares.stack.unshift({ route: '', handle: makeDevGoMiddleware(redirects) });
       },
     },
   };

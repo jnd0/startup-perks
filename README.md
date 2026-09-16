@@ -81,29 +81,35 @@ Outbound "Claim Offer" links on perk pages go through a private redirect route i
 
 How it works:
 
-- An Astro integration in `astro.config.mjs` regenerates `functions/go/_map.ts` on every build. It maps every active perk id to its `applyUrl`, so adding a perk makes it trackable automatically.
-- `functions/go/[slug].ts` is a Cloudflare Pages Function: it resolves the target URL, records the click, and responds with a `302` redirect. Unknown slugs redirect to the homepage.
-- Clicks are counted in a Cloudflare KV namespace. The write runs through `waitUntil`, so redirects are never delayed by it.
-- Locally (`bun run dev`, `wrangler pages dev`), the function works without the KV binding: redirects work and counting is simply skipped.
+- An Astro integration in `astro.config.mjs` regenerates `functions/go/_map.ts` on every build. It maps every active perk id to its `applyUrl`, so adding a perk makes it trackable automatically. Set `DISABLE_REDIRECTS=1` at build time to fall back to direct provider links.
+- The production Worker (`worker/index.ts`, wired up by `wrangler.jsonc` via `main` + the `ASSETS` binding) serves static assets first and handles `/go/*` requests itself, so redirects work on the deployed Worker.
+- `bun run dev` handles `/go/*` with a dev-server middleware injected by the same integration (redirect only, no counting).
+- Cloudflare Pages deployments are also supported via `functions/go/[slug].ts`.
+- Clicks are recorded with an atomic SQL upsert (`INSERT ... ON CONFLICT ... DO UPDATE SET clicks = clicks + 1`) against a D1 database, so concurrent clicks never overwrite each other. The write runs through `waitUntil`, so redirects are never delayed by it, and a missing/misconfigured table logs an error without breaking the redirect.
 
-To enable counting in production, create and bind a KV namespace once:
-
-```bash
-bunx wrangler pages project list
-bunx wrangler kv namespace create TRACKING_KV
-```
-
-Then in the Cloudflare Pages dashboard: your project -> Settings -> Functions -> KV namespace bindings -> add `TRACKING_KV` pointing at the new namespace, and redeploy.
-
-To read click counts, use the dashboard (Storage & Databases -> KV -> the namespace) or:
+To enable counting in production, create a D1 database and bind it once:
 
 ```bash
-bunx wrangler kv key get "go:shor-payroll" --namespace-id=<NAMESPACE_ID>
+bunx wrangler d1 create startupperks-stats
 ```
 
-Counts are stored one key per perk (`go:<perk-id>`) and are not exposed on the public site.
+Run the table DDL (exported as `CLICKS_TABLE_DDL` in `shared/go-redirect.ts`):
 
-Note: this uses Pages Functions, so it applies to Cloudflare Pages deployments. Serving `dist/` as a plain Worker with static assets (`wrangler.jsonc`) will not include the redirect route.
+```bash
+bunx wrangler d1 execute startupperks-stats --command "CREATE TABLE IF NOT EXISTS perk_clicks (slug TEXT PRIMARY KEY, clicks INTEGER NOT NULL)" --remote
+```
+
+Then uncomment the `d1_databases` block in `wrangler.jsonc`, fill in the returned `database_id`, and redeploy.
+
+To read click counts:
+
+```bash
+bunx wrangler d1 execute startupperks-stats --command "SELECT slug, clicks FROM perk_clicks ORDER BY clicks DESC" --remote
+```
+
+Counts live only in your D1 database and are not exposed on the public site.
+
+Note: `astro preview` serves plain static output and does not handle `/go/*`; use `bun run dev` or a deployed Worker to exercise redirects.
 
 ## Automated submissions API
 
@@ -131,8 +137,10 @@ https://startup-perks-submit-api.<your-subdomain>.workers.dev/api/submit-perk
 │   ├── components/           # UI components
 │   ├── layouts/              # Shared layout and metadata
 │   └── pages/                # Astro routes
-├── functions/go/             # Cloudflare Pages Function for outbound redirects
+├── functions/go/             # Pages Function redirect entry (Pages deployments)
 │   └── _map.ts               # Generated at build time (gitignored)
+├── worker/                   # Production Worker entry: assets + /go/ redirects
+├── shared/                   # Redirect logic shared by Worker and Pages Function
 ├── CONTRIBUTING.md
 └── .github/
     ├── workflows/validate.yml
