@@ -3,6 +3,7 @@ import { REDIRECTS } from "../functions/go/_map";
 export interface TrackingDatabase {
   prepare(query: string): {
     bind(...values: unknown[]): { run(): Promise<unknown> };
+    all(): Promise<{ results?: unknown }>;
   };
 }
 
