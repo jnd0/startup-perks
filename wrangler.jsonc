@@ -1,14 +1,16 @@
 {
-  "name": "startup-perks",
-  "main": "worker/index.ts",
-  "compatibility_date": "2026-02-06",
-  // Click tracking: create a D1 database, run the table DDL from shared/go-redirect.ts
-  // (CLICKS_TABLE_DDL), then uncomment and fill in the database_id. See README.
-  // "d1_databases": [
-  //   { "binding": "TRACKING_DB", "database_name": "startupperks-stats", "database_id": "<your-d1-id>" }
-  // ],
-  "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS"
-  }
+	"name": "startup-perks",
+	"main": "worker/index.ts",
+	"compatibility_date": "2026-02-06",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			"binding": "TRACKING_DB",
+			"database_name": "startupperks-stats",
+			"database_id": "a2c703e6-ee3d-41f9-ba5d-0c0cd97e1192"
+		}
+	]
 }
