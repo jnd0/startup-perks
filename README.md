@@ -109,6 +109,27 @@ bunx wrangler d1 execute startupperks-stats --command "SELECT slug, clicks FROM 
 
 Counts live only in your D1 database and are not exposed on the public site.
 
+## Click analytics dashboard
+
+A private dashboard renders the click counts as a simple page:
+
+```text
+https://startup-perks.com/admin/dashboard?key=<ADMIN_KEY>
+```
+
+- Requires an `ADMIN_KEY` secret on the Worker. Requests with a missing or wrong key get `401 Unauthorized`; the check runs before any database access and uses constant-time comparison of keyed hashes.
+- Add `&format=json` to get the same data as JSON (`{ totalClicks, perks: [{ slug, clicks }] }`) for scripts or exports.
+- Pages always send `Cache-Control: no-store`, so nothing is cached at the edge.
+- Locally (`bunx wrangler dev --local`), set `ADMIN_KEY=<value>` in `.dev.vars` (gitignored). Without a D1 binding the page shows a friendly fallback instead of erroring.
+
+Set the secret once:
+
+```bash
+bunx wrangler secret put ADMIN_KEY
+```
+
+Use a long random value (for example `openssl rand -hex 24`). Rotating the key replaces the secret immediately. The key travels in the URL, so treat the dashboard URL like a password: do not share it publicly.
+
 Note: `astro preview` serves plain static output and does not handle `/go/*`; use `bun run dev` or a deployed Worker to exercise redirects.
 
 ## Automated submissions API
