@@ -51,6 +51,10 @@ Add caveats here, such as partner-only tracks, deadlines, or limited regions.
 - Do not copy marketing text directly.
 - If a perk is no longer active, set `isActive: false` instead of deleting history.
 
+## Outbound links
+
+The `applyUrl` you add is used verbatim in frontmatter, sitemaps, and structured data. On the rendered page, the "Claim Offer" button is automatically rewritten to `/go/<perk-id>/`, a redirect route that counts clicks privately before forwarding to your `applyUrl`. No extra configuration is needed when adding a perk.
+
 ## Helpful commands
 
 ```bash

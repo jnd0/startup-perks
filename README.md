@@ -71,6 +71,40 @@ Notes:
 - Cloudflare Workers with static assets do not support runtime Worker variables; use build-time envs or rely on the repository defaults in this codebase.
 - SEO assets are generated at build time: `dist/sitemap-index.xml` and `public/robots.txt`.
 
+## Outbound click tracking
+
+Outbound "Claim Offer" links on perk pages go through a private redirect route instead of linking directly to the provider:
+
+```text
+/perks/shor-payroll/  ->  Claim Offer  ->  /go/shor-payroll/  ->  302 to the perk's applyUrl
+```
+
+How it works:
+
+- An Astro integration in `astro.config.mjs` regenerates `functions/go/_map.ts` on every build. It maps every active perk id to its `applyUrl`, so adding a perk makes it trackable automatically.
+- `functions/go/[slug].ts` is a Cloudflare Pages Function: it resolves the target URL, records the click, and responds with a `302` redirect. Unknown slugs redirect to the homepage.
+- Clicks are counted in a Cloudflare KV namespace. The write runs through `waitUntil`, so redirects are never delayed by it.
+- Locally (`bun run dev`, `wrangler pages dev`), the function works without the KV binding: redirects work and counting is simply skipped.
+
+To enable counting in production, create and bind a KV namespace once:
+
+```bash
+bunx wrangler pages project list
+bunx wrangler kv namespace create TRACKING_KV
+```
+
+Then in the Cloudflare Pages dashboard: your project -> Settings -> Functions -> KV namespace bindings -> add `TRACKING_KV` pointing at the new namespace, and redeploy.
+
+To read click counts, use the dashboard (Storage & Databases -> KV -> the namespace) or:
+
+```bash
+bunx wrangler kv key get "go:shor-payroll" --namespace-id=<NAMESPACE_ID>
+```
+
+Counts are stored one key per perk (`go:<perk-id>`) and are not exposed on the public site.
+
+Note: this uses Pages Functions, so it applies to Cloudflare Pages deployments. Serving `dist/` as a plain Worker with static assets (`wrangler.jsonc`) will not include the redirect route.
+
 ## Automated submissions API
 
 The repository includes a separate Worker API at `workers/submit-api/` for automatic PR creation.
@@ -97,6 +131,8 @@ https://startup-perks-submit-api.<your-subdomain>.workers.dev/api/submit-perk
 │   ├── components/           # UI components
 │   ├── layouts/              # Shared layout and metadata
 │   └── pages/                # Astro routes
+├── functions/go/             # Cloudflare Pages Function for outbound redirects
+│   └── _map.ts               # Generated at build time (gitignored)
 ├── CONTRIBUTING.md
 └── .github/
     ├── workflows/validate.yml
