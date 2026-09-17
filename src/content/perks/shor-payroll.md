@@ -16,6 +16,7 @@ fundingStages:
 regions:
   - Global
 categories:
+  - HR & Payroll
   - Fintech
 applyUrl: https://shorpay.com/?ref=startup-perks
 sourceUrl: https://docs.shorpay.com/pricing
